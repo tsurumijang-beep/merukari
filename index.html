@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>メルカリ販売管理ダッシュボード</title>
+    <title>メルカリ販売管理システム</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
@@ -13,6 +13,7 @@
             --card-bg: #F5F5F5;
             --accent-blue: #2196F3;
             --accent-orange: #FF7043;
+            --accent-green: #66BB6A;
             --mercari-red: #FF0000;
             --clay-shadow: 20px 20px 40px rgba(0,0,0,0.1), inset -10px -10px 15px rgba(0,0,0,0.05), inset 10px 10px 15px rgba(255,255,255,0.8);
             --btn-shadow: 8px 8px 16px rgba(0,0,0,0.1), inset -4px -4px 8px rgba(0,0,0,0.1), inset 4px 4px 8px rgba(255,255,255,0.5);
@@ -20,9 +21,8 @@
 
         body { background-color: var(--bg-color); font-family: 'Noto Sans JP', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; color: #333; }
         
-        /* Sidebar */
         nav { width: 260px; padding: 25px; display: flex; flex-direction: column; gap: 12px; z-index: 100; }
-        .logo { font-size: 2.2rem; font-weight: 900; margin-bottom: 15px; color: #1A237E; cursor: pointer; }
+        .logo { font-size: 2.2rem; font-weight: 900; margin-bottom: 15px; color: #1A237E; cursor: pointer; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
         
         .menu-btn {
             background: var(--accent-blue); color: white; padding: 12px; border-radius: 20px;
@@ -30,50 +30,46 @@
             font-size: 0.95rem;
         }
         .menu-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
-        .upload-label { background: white; color: var(--accent-blue); font-size: 0.85rem; border: 2px solid #BBDEFB; margin-top: 5px; }
-        .run-btn { background: var(--accent-orange) !important; margin-top: 10px; font-size: 1rem; padding: 15px !important; }
+        .upload-label { background: white; color: var(--accent-blue); font-size: 0.85rem; border: 2px solid #BBDEFB; margin-top: 5px; cursor: pointer; border-radius: 15px; padding: 10px; text-align: center; box-shadow: var(--btn-shadow); display: block; }
+        .run-btn { background: var(--accent-orange) !important; margin-top: 10px; font-size: 1.1rem; padding: 15px !important; }
 
-        /* Main Area */
         main { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; }
         
-        /* Header Widgets */
         header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
         .header-widget {
             padding: 10px 25px; border-radius: 15px; font-weight: 900; font-size: 1.2rem;
             box-shadow: var(--clay-shadow); border: 3px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center;
         }
-        .mercari-logo { background: var(--mercari-red); color: white; border-radius: 12px; width: 180px; font-size: 1.5rem; letter-spacing: 5px; }
-        .stat-stock { background: #000; color: white; min-width: 150px; }
-        .stat-sales { background: #448AFF; color: white; min-width: 150px; }
-        .clock-card { background: #64B5F6; color: white; margin-left: auto; border-radius: 50px; font-size: 1rem; padding: 10px 20px; }
+        .mercari-logo { background: var(--mercari-red); color: white; min-width: 180px; letter-spacing: 5px; }
+        .stat-stock { background: #000; color: white; min-width: 180px; }
+        .stat-sales { background: #448AFF; color: white; min-width: 180px; }
+        .clock-card { background: #64B5F6; color: white; margin-left: auto; border-radius: 50px; font-size: 1rem; padding: 10px 25px; box-shadow: var(--clay-shadow); font-weight: 700; }
 
-        /* Page Content */
         .page-content { display: none; width: 100%; animation: fadeIn 0.4s; }
         .active-page { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Dashboard Grid */
-        .dashboard-grid { display: grid; grid-template-columns: 1.8fr 1fr 1fr; grid-template-rows: auto auto; gap: 20px; }
-        .card { background: var(--card-bg); border-radius: 30px; padding: 15px; box-shadow: var(--clay-shadow); border: 5px solid white; display: flex; flex-direction: column; }
-        .card h3 { margin: 0 0 10px 0; color: #555; font-size: 0.9rem; font-weight: 900; }
-        .chart-container { flex: 1; position: relative; min-height: 250px; }
+        .dashboard-grid { display: grid; grid-template-columns: 1.8fr 1.2fr 1fr; gap: 20px; }
+        .card { background: var(--card-bg); border-radius: 30px; padding: 20px; box-shadow: var(--clay-shadow); border: 5px solid white; display: flex; flex-direction: column; }
+        .card h3 { margin: 0 0 10px 0; color: #555; font-size: 1rem; font-weight: 900; }
+        .chart-container { flex: 1; position: relative; min-height: 280px; width: 100%; }
 
-        /* Tables */
         .table-card { background: white; border-radius: 30px; padding: 25px; box-shadow: var(--clay-shadow); border: 5px solid white; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        th { background: #E3F2FD; padding: 12px; text-align: left; cursor: pointer; position: relative; user-select: none; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
+        th { background: #E3F2FD; padding: 12px; text-align: left; cursor: pointer; border-bottom: 2px solid #ddd; position: relative; user-select: none; }
         th:hover { background: #BBDEFB; }
-        th::after { content: " ↕"; font-size: 0.7rem; color: #999; }
-        td { padding: 10px; border-bottom: 1px solid #eee; }
+        th.sort-asc::after { content: " ▲"; color: var(--accent-blue); }
+        th.sort-desc::after { content: " ▼"; color: var(--accent-blue); }
+        td { padding: 12px; border-bottom: 1px solid #eee; }
         .prod-link { color: #2196F3; text-decoration: underline; font-weight: bold; cursor: pointer; }
 
-        .shipping-item { margin-bottom: 10px; font-size: 0.8rem; font-weight: 700; }
-        .progress-bg { background: #D1D9E6; height: 10px; border-radius: 50px; overflow: hidden; margin-top: 3px; }
+        .shipping-item { margin-bottom: 15px; font-size: 0.85rem; font-weight: 700; }
+        .progress-bg { background: #D1D9E6; height: 12px; border-radius: 50px; overflow: hidden; margin-top: 5px; }
         .progress-bar { height: 100%; background: var(--accent-blue); transition: width 1s; }
-        .top-product { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #eee; font-size: 0.8rem; font-weight: 700; }
+        .top-product { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 0.85rem; font-weight: 700; }
 
         input[type="file"] { display: none; }
-        .file-status { font-size: 0.7rem; color: #555; text-align: center; margin-bottom: 5px; }
+        .file-status { font-size: 0.75rem; color: #555; text-align: center; margin-bottom: 10px; }
         hr { width:100%; border:0; border-top:1px dashed #999; margin:10px 0; }
     </style>
 </head>
@@ -82,16 +78,15 @@
     <nav>
         <div class="logo" onclick="showPage('dashboardPage')">Dashboard</div>
         <button class="menu-btn" onclick="showPage('allStockPage')">全在庫一覧</button>
-        <button class="menu-btn" onclick="showPage('monthlyStockPage')">出品月別在庫</button>
         <button class="menu-btn" onclick="showPage('salesListPage')">販売品一覧</button>
         <button class="menu-btn" onclick="showPage('resalePage')">再出品予定</button>
         <hr>
-        <label for="listingCsv" class="menu-btn upload-label">📁 Listing CSV 選択</label>
+        <label for="listingCsv" class="upload-label">📁 在庫一覧(Listing) CSV 選択</label>
         <input type="file" id="listingCsv" accept=".csv">
-        <div id="listing-status" class="file-status">ファイル未選択</div>
-        <label for="salesCsv" class="menu-btn upload-label">💰 Sales CSV 選択</label>
+        <div id="listing-status" class="file-status">保存データを表示中</div>
+        <label for="salesCsv" class="upload-label">💰 販売履歴(Sales) CSV 選択</label>
         <input type="file" id="salesCsv" accept=".csv">
-        <div id="sales-status" class="file-status">ファイル未選択</div>
+        <div id="sales-status" class="file-status">保存データを表示中</div>
         <button id="applyBtn" class="menu-btn run-btn">データを反映する</button>
     </nav>
 
@@ -105,8 +100,8 @@
 
         <div id="dashboardPage" class="page-content active-page">
             <div class="dashboard-grid">
-                <div class="card">
-                    <h3>出品月別_在庫数</h3>
+                <div class="card" style="grid-column: span 1;">
+                    <h3>出品月別_在庫数 (実データ集計)</h3>
                     <div class="chart-container"><canvas id="inventoryChart"></canvas></div>
                 </div>
                 <div class="card">
@@ -118,7 +113,7 @@
                     <div id="shipping-list"></div>
                 </div>
                 <div class="card" style="grid-column: span 2;">
-                    <h3>月別販売利益</h3>
+                    <h3>月別販売推移 (利益 vs 件数)</h3>
                     <div class="chart-container"><canvas id="salesChart"></canvas></div>
                 </div>
                 <div class="card">
@@ -128,22 +123,20 @@
             </div>
         </div>
 
-        <div id="allStockPage" class="page-content"><div class="table-card"><h3>全在庫一覧 (ヘッダークリックでソート)</h3><div id="allStockTable"></div></div></div>
-        <div id="monthlyStockPage" class="page-content"><div class="table-card"><h3>出品月別在庫リスト (ヘッダークリックでソート)</h3><div id="monthlyStockTable"></div></div></div>
-        <div id="salesListPage" class="page-content"><div class="table-card"><h3>販売品一覧 (ヘッダークリックでソート)</h3><div id="salesListTable"></div></div></div>
-        <div id="resalePage" class="page-content"><div class="table-card"><h3>再出品予定リスト (30日経過 / ヘッダークリックでソート)</h3><div id="resaleTable"></div></div></div>
+        <div id="allStockPage" class="page-content"><div class="table-card"><h3>全在庫一覧</h3><div id="allStockTable"></div></div></div>
+        <div id="salesListPage" class="page-content"><div class="table-card"><h3>販売品一覧</h3><div id="salesListTable"></div></div></div>
+        <div id="resalePage" class="page-content"><div class="table-card"><h3>再出品予定リスト</h3><div id="resaleTable"></div></div></div>
     </main>
 
     <script>
-        // ストレージからデータを復元
-        let rawListing = JSON.parse(localStorage.getItem('mer-listing')) || [];
-        let rawSales = JSON.parse(localStorage.getItem('mer-sales')) || [];
+        let rawListing = JSON.parse(localStorage.getItem('mercari_last_listing')) || [];
+        let rawSales = JSON.parse(localStorage.getItem('mercari_last_sales')) || [];
         let charts = {};
-        let sortConfig = { table: '', key: '', direction: 'asc' };
+        let sortState = { allStock: { key: '出品日時', dir: 'desc' }, salesList: { key: '購入完了日', dir: 'desc' }, resale: { key: 'elapsed', dir: 'desc' } };
 
         window.onload = () => {
             updateTime();
-            if(rawListing.length > 0 && rawSales.length > 0) refreshDashboard();
+            if (rawListing.length > 0 || rawSales.length > 0) updateAllUI();
         };
         setInterval(updateTime, 1000);
 
@@ -153,156 +146,170 @@
             document.getElementById('current-time').innerText = `${now.getFullYear()}年 ${(now.getMonth()+1).toString().padStart(2,'0')}月 ${now.getDate().toString().padStart(2,'0')}日 (${days[now.getDay()]}) ${now.toLocaleTimeString('ja-JP', {hour12:false})}`;
         }
 
-        function refreshDashboard() {
-            document.getElementById('count-stock').innerText = rawListing.length;
-            const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, '0');
-            const thisMonthCount = rawSales.filter(d => (d['購入完了日']||"").includes(`-${currentMonth}-`)).length;
-            document.getElementById('count-sales-month').innerText = thisMonthCount;
-            renderCharts(rawListing, rawSales);
-            rebuildAllTables();
-        }
-
         function showPage(pageId) {
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active-page'));
             document.getElementById(pageId).classList.add('active-page');
+            window.scrollTo(0,0);
         }
 
         document.getElementById('listingCsv').onchange = e => { if(e.target.files[0]) document.getElementById('listing-status').innerText = "✅ " + e.target.files[0].name; };
         document.getElementById('salesCsv').onchange = e => { if(e.target.files[0]) document.getElementById('sales-status').innerText = "✅ " + e.target.files[0].name; };
 
-        document.getElementById('applyBtn').onclick = () => {
+        document.getElementById('applyBtn').onclick = function() {
             const lFile = document.getElementById('listingCsv').files[0];
             const sFile = document.getElementById('salesCsv').files[0];
-            
-            if(!lFile && rawListing.length === 0) return alert("Listing CSVを選択してください。");
-            if(!sFile && rawSales.length === 0) return alert("Sales CSVを選択してください。");
+            const options = { header: true, skipEmptyLines: true, transformHeader: h => h.trim().replace(/^\ufeff/, "") };
+            let loaded = 0, target = (lFile?1:0) + (sFile?1:0);
 
-            if(lFile) {
-                Papa.parse(lFile, { header: true, skipEmptyLines: true, complete: r => {
-                    rawListing = r.data.map(row => { let n = {}; Object.keys(row).forEach(k => n[k.trim().replace(/^\ufeff/, "")] = row[k]); return n; });
-                    localStorage.setItem('mer-listing', JSON.stringify(rawListing));
-                    if(sFile || rawSales.length > 0) refreshDashboard();
-                }});
-            }
-            if(sFile) {
-                Papa.parse(sFile, { header: true, skipEmptyLines: true, complete: r => {
-                    rawSales = r.data.map(row => { let n = {}; Object.keys(row).forEach(k => n[k.trim().replace(/^\ufeff/, "")] = row[k]); return n; });
-                    localStorage.setItem('mer-sales', JSON.stringify(rawSales));
-                    if(lFile || rawListing.length > 0) refreshDashboard();
-                }});
-            }
-            alert("データを反映しました。");
+            if (lFile) Papa.parse(lFile, { ...options, complete: r => { rawListing = r.data; localStorage.setItem('mercari_last_listing', JSON.stringify(rawListing)); check(); }});
+            if (sFile) Papa.parse(sFile, { ...options, complete: r => { rawSales = r.data; localStorage.setItem('mercari_last_sales', JSON.stringify(rawSales)); check(); }});
+            function check() { loaded++; if(loaded === target) { updateAllUI(); alert("データを反映しました。"); } }
         };
 
-        // --- 以下、集計・描画ロジックは前回同様 ---
+        function updateAllUI() {
+            document.getElementById('count-stock').innerText = rawListing.length;
+            const curM = (new Date().getMonth()+1).toString().padStart(2,'0');
+            const curY = new Date().getFullYear();
+            const salesM = rawSales.filter(d => (d['購入完了日']||"").includes(`${curY}-${curM}`)).length;
+            document.getElementById('count-sales-month').innerText = salesM;
+
+            renderCharts();
+            rebuildTables();
+        }
+
         function categorize(name) {
             if (!name) return 'その他';
-            if (name.includes('水着') || name.includes('ビキニ')) return '水着';
-            if (name.includes('ハイヒール') || name.includes('パンプス') || name.includes('サンダル') || name.includes('ブーツ')) return '靴';
-            if (name.includes('ボディコン')) return 'ボディコン';
-            if (name.includes('ワンピース') || name.includes('ワンピ')) return 'ワンピース';
-            if (name.includes('スカート')) return 'スカート';
-            if (name.includes('パンツ') || name.includes('レギンス')) return 'パンツ';
-            if (name.includes('Tシャツ') || name.includes('シャツ') || name.includes('セーター')) return 'トップス';
-            if (name.includes('ボディスーツ') || name.includes('ランジェリー') || name.includes('ショーツ')) return 'インナー';
+            const n = name.toLowerCase();
+            if (n.includes('水着')) return '水着';
+            if (n.includes('ハイヒール') || n.includes('パンプス')) return '靴';
+            if (n.includes('ボディコン')) return 'ボディコン';
+            if (n.includes('ワンピース') || n.includes('ワンピ')) return 'ワンピース';
+            if (n.includes('スカート')) return 'スカート';
+            if (n.includes('パンツ')) return 'パンツ';
+            if (n.includes('インナー') || n.includes('ショーツ')) return 'インナー';
             return 'その他';
         }
 
-        function sortData(data, key, direction) {
-            return data.sort((a, b) => {
-                let valA = a[key] || ''; let valB = b[key] || '';
-                if (key.includes('価格') || key.includes('代金') || key.includes('利益') || key.includes('いいね') || key === 'elapsed') {
-                    valA = parseInt(String(valA).replace(/[^0-9]/g, "")) || 0; valB = parseInt(String(valB).replace(/[^0-9]/g, "")) || 0;
+        function renderCharts() {
+            // --- 出品日時から年月を動的に集計 (在庫グラフ用) ---
+            const invMap = {};
+            rawListing.forEach(d => {
+                const dateStr = d['出品日時'] || ""; // 2026-08-06...
+                if (dateStr.includes('-')) {
+                    const parts = dateStr.split('-');
+                    const label = `${parts[0].slice(-2)}-${parts[1]}`; // "26-08" 形式
+                    invMap[label] = (invMap[label] || 0) + 1;
                 }
-                if (valA < valB) return direction === 'asc' ? -1 : 1;
-                if (valA > valB) return direction === 'asc' ? 1 : -1;
-                return 0;
             });
-        }
+            const invLabels = Object.keys(invMap).sort(); // 時系列ソート
+            drawBar('inventoryChart', invLabels, invLabels.map(l => invMap[l]), '#2196F3');
 
-        function handleSort(tableName, key) {
-            sortConfig.direction = (sortConfig.key === key && sortConfig.direction === 'asc') ? 'desc' : 'asc';
-            sortConfig.key = key; sortConfig.table = tableName; rebuildAllTables();
-        }
-
-        function rebuildAllTables() {
-            buildAllStockTable(); buildMonthlyStockTable(); buildSalesTable(); buildResaleTable();
-        }
-
-        function buildAllStockTable() {
-            let data = [...rawListing]; if(sortConfig.table === 'all') data = sortData(data, sortConfig.key, sortConfig.direction);
-            let h = `<table><thead><tr><th onclick="handleSort('all','出品日時')">出品日</th><th>種類</th><th onclick="handleSort('all','商品名')">商品名</th><th onclick="handleSort('all','商品代金')">価格</th><th onclick="handleSort('all','いいね！')">いいね</th></tr></thead><tbody>`;
-            data.forEach(d => h += `<tr><td>${d['出品日時']}</td><td>${categorize(d['商品名'])}</td><td><a href="${d['商品URL']}" target="_blank" class="prod-link">${d['商品名']}</a></td><td>¥${parseInt(d['商品代金']||0).toLocaleString()}</td><td>${d['いいね！']}</td></tr>`);
-            document.getElementById('allStockTable').innerHTML = h + `</tbody></table>`;
-        }
-        
-        function buildMonthlyStockTable() {
-            let data = [...rawListing]; if(sortConfig.table === 'monthly') data = sortData(data, sortConfig.key, sortConfig.direction);
-            let h = `<table><thead><tr><th onclick="handleSort('monthly','出品月(集計用)')">出品月</th><th>種類</th><th onclick="handleSort('monthly','商品名')">商品名</th><th onclick="handleSort('monthly','商品代金')">価格</th></tr></thead><tbody>`;
-            data.forEach(d => h += `<tr><td>26-${d['出品月(集計用)']||'00'}</td><td>${categorize(d['商品名'])}</td><td><a href="${d['商品URL']}" target="_blank" class="prod-link">${d['商品名']}</a></td><td>¥${parseInt(d['商品代金']||0).toLocaleString()}</td></tr>`);
-            document.getElementById('monthlyStockTable').innerHTML = h + `</tbody></table>`;
-        }
-
-        function buildSalesTable() {
-            let data = [...rawSales]; if(sortConfig.table === 'sales') data = sortData(data, sortConfig.key, sortConfig.direction);
-            let h = `<table><thead><tr><th onclick="handleSort('sales','購入完了日')">完了日</th><th onclick="handleSort('sales','商品名')">商品名</th><th onclick="handleSort('sales','商品代金')">価格</th><th onclick="handleSort('sales','販売利益')">利益</th></tr></thead><tbody>`;
-            data.forEach(d => h += `<tr><td>${d['購入完了日']}</td><td><a href="${d['商品URL']}" target="_blank" class="prod-link">${d['商品名']}</a></td><td>¥${parseInt(d['商品代金']||0).toLocaleString()}</td><td>¥${parseInt(d['販売利益']||0).toLocaleString()}</td></tr>`);
-            document.getElementById('salesListTable').innerHTML = h + `</tbody></table>`;
-        }
-
-        function buildResaleTable() {
-            const today = new Date('2026-08-11');
-            let data = rawListing.filter(d => Math.ceil(Math.abs(today - new Date(d['出品日時']))/(1000*60*60*24)) >= 30).map(d => ({...d, elapsed: Math.ceil(Math.abs(today - new Date(d['出品日時']))/(1000*60*60*24))}));
-            if(sortConfig.table === 'resale') data = sortData(data, sortConfig.key, sortConfig.direction);
-            let h = `<table><thead><tr><th onclick="handleSort('resale','出品日時')">出品日</th><th onclick="handleSort('resale','elapsed')">経過</th><th onclick="handleSort('resale','商品名')">商品名</th><th onclick="handleSort('商品代金')">価格</th></tr></thead><tbody>`;
-            data.forEach(d => h += `<tr><td>${d['出品日時']}</td><td style="color:red; font-weight:bold;">${d.elapsed}日</td><td><a href="${d['商品URL']}" target="_blank" class="prod-link">${d['商品名']}</a></td><td>¥${parseInt(d['商品代金']||0).toLocaleString()}</td></tr>`);
-            document.getElementById('resaleTable').innerHTML = h + `</tbody></table>`;
-        }
-
-        function renderCharts(listing, sales) {
-            const invM = {}; listing.forEach(d => { const label = `26-${d['出品月(集計用)']||'00'}`; invM[label] = (invM[label]||0)+1; });
-            const sortedL = Object.keys(invM).sort();
-            drawBar('inventoryChart', sortedL, sortedL.map(l => invM[l]), '#2196F3');
-
-            const types = {}; listing.forEach(d => { const cat = categorize(d['商品名']); types[cat] = (types[cat] || 0) + 1; });
+            // --- 種類別構成 ---
+            const types = {};
+            rawListing.forEach(d => { const cat = categorize(d['商品名']); types[cat] = (types[cat] || 0) + 1; });
             drawPie('typeChart', Object.keys(types), Object.values(types));
 
-            const ships = {}; sales.forEach(d => { const m = d['配送の方法']||"未定"; ships[m] = (ships[m]||0)+1; });
+            // --- 配送方法 ---
+            const ships = {};
+            rawSales.forEach(d => { const m = d['配送の方法']||"未定"; ships[m] = (ships[m]||0)+1; });
             document.getElementById('shipping-list').innerHTML = Object.keys(ships).map(m => {
-                const pct = Math.round((ships[m]/sales.length)*100);
+                const pct = Math.round((ships[m]/(rawSales.length||1))*100);
                 return `<div class="shipping-item">${m} (${pct}%)<div class="progress-bg"><div class="progress-bar" style="width:${pct}%"></div></div></div>`;
             }).join('');
 
-            const profM = {}; sales.forEach(d => {
-                const label = `26-${d['購入完了月(集計用)']||'01'}`;
-                const val = parseInt((d['販売利益']||"0").replace(/[^0-9]/g,""))||0;
-                profM[label] = (profM[label]||0)+val;
+            // --- 月別販売推移 ---
+            const saleProfits = {}, saleCounts = {};
+            rawSales.forEach(d => {
+                const ds = d['購入完了日'] || "";
+                if (ds.includes('-')) {
+                    const parts = ds.split('-');
+                    const label = `${parts[0].slice(-2)}-${parts[1]}`;
+                    const p = parseInt((d['販売利益']||"0").replace(/[^0-9]/g,""))||0;
+                    saleProfits[label] = (saleProfits[label] || 0) + p;
+                    saleCounts[label] = (saleCounts[label] || 0) + 1;
+                }
             });
-            const sortedS = Object.keys(profM).sort();
-            drawBar('salesChart', sortedS, sortedS.map(l => profM[l]), '#66BB6A');
+            const saleLabels = Object.keys(saleProfits).sort();
+            drawSalesChart('salesChart', saleLabels, saleLabels.map(l => saleProfits[l]), saleLabels.map(l => saleCounts[l]));
 
-            const top = [...listing].sort((a,b) => (parseInt(b['いいね！'])||0)-(parseInt(a['いいね！'])||0)).slice(0, 5);
+            // --- いいね上位 ---
+            const top = [...rawListing].sort((a,b) => (parseInt(b['いいね！'])||0)-(parseInt(a['いいね！'])||0)).slice(0, 5);
             document.getElementById('likes-list').innerHTML = top.map(i => `
                 <div class="top-product">
                     <span><a href="${i['商品URL']||'#'}" target="_blank" class="prod-link">${(i['商品名']||'').substring(0,10)}..</a></span>
-                    <span>¥${parseInt(i['商品代金']||0).toLocaleString()} ❤️${i['いいね！']||0}</span>
+                    <span>¥${(parseInt(i['商品代金'])||0).toLocaleString()} ❤️${i['いいね！']||0}</span>
                 </div>
             `).join('');
         }
 
+        // --- SORTING & TABLES ---
+        function sortTableData(data, key, direction) {
+            return [...data].sort((a, b) => {
+                let vA = a[key] || '', vB = b[key] || '';
+                if (['商品代金', '販売利益', 'いいね！', 'elapsed'].includes(key)) {
+                    vA = parseInt(String(vA).replace(/[^0-9]/g, "")) || 0;
+                    vB = parseInt(String(vB).replace(/[^0-9]/g, "")) || 0;
+                }
+                if (vA < vB) return direction === 'asc' ? -1 : 1;
+                if (vA > vB) return direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        function triggerSort(tableId, key) {
+            const cur = sortState[tableId];
+            if (cur.key === key) cur.dir = cur.dir === 'asc' ? 'desc' : 'asc';
+            else { cur.key = key; cur.dir = 'asc'; }
+            rebuildTables();
+        }
+
+        function getCls(tableId, key) {
+            if (sortState[tableId].key !== key) return "";
+            return sortState[tableId].dir === 'asc' ? "sort-asc" : "sort-desc";
+        }
+
+        function rebuildTables() {
+            // All Stock
+            let dataA = sortTableData(rawListing, sortState.allStock.key, sortState.allStock.dir);
+            let hA = `<table><thead><tr><th class="${getCls('allStock','出品日時')}" onclick="triggerSort('allStock','出品日時')">出品日時</th><th>種類</th><th onclick="triggerSort('allStock','商品名')">商品名</th><th class="${getCls('allStock','商品代金')}" onclick="triggerSort('allStock','商品代金')">価格</th><th class="${getCls('allStock','いいね！')}" onclick="triggerSort('allStock','いいね！')">いいね</th></tr></thead><tbody>`;
+            dataA.forEach(d => hA += `<tr><td>${d['出品日時']||'-'}</td><td>${categorize(d['商品名'])}</td><td><a href="${d['商品URL']}" target="_blank" class="prod-link">${d['商品名']}</a></td><td>¥${(parseInt(d['商品代金'])||0).toLocaleString()}</td><td>${d['いいね！']||0}</td></tr>`);
+            document.getElementById('allStockTable').innerHTML = hA + `</tbody></table>`;
+
+            // Sales List
+            let dataS = sortTableData(rawSales, sortState.salesList.key, sortState.salesList.dir);
+            let hS = `<table><thead><tr><th class="${getCls('salesList','購入完了日')}" onclick="triggerSort('salesList','購入完了日')">完了日</th><th onclick="triggerSort('salesList','商品名')">商品名</th><th class="${getCls('salesList','商品代金')}" onclick="triggerSort('salesList','商品代金')">価格</th><th class="${getCls('salesList','販売利益')}" onclick="triggerSort('salesList','販売利益')">利益</th></tr></thead><tbody>`;
+            dataS.forEach(d => hS += `<tr><td>${d['購入完了日']||'-'}</td><td><a href="${d['商品URL']}" target="_blank" class="prod-link">${d['商品名']}</a></td><td>¥${(parseInt(d['商品代金'])||0).toLocaleString()}</td><td>¥${(parseInt(d['販売利益'])||0).toLocaleString()}</td></tr>`);
+            document.getElementById('salesListTable').innerHTML = hS + `</tbody></table>`;
+
+            // Resale
+            const today = new Date('2026-08-11');
+            let dataR = rawListing.filter(d => Math.ceil(Math.abs(today - new Date(d['出品日時']))/(1000*60*60*24)) >= 30).map(d => ({...d, elapsed: Math.ceil(Math.abs(today - new Date(d['出品日時']))/(1000*60*60*24))}));
+            dataR = sortTableData(dataR, sortState.resale.key, sortState.resale.dir);
+            let hR = `<table><thead><tr><th class="${getCls('resale','出品日時')}" onclick="triggerSort('resale','出品日時')">出品日時</th><th class="${getCls('resale','elapsed')}" onclick="triggerSort('resale','elapsed')">経過日数</th><th onclick="triggerSort('resale','商品名')">商品名</th><th class="${getCls('resale','商品代金')}" onclick="triggerSort('resale','商品代金')">価格</th></tr></thead><tbody>`;
+            dataR.forEach(d => hR += `<tr><td>${d['出品日時']||'-'}</td><td style="color:red; font-weight:bold;">${d.elapsed}日</td><td><a href="${d['商品URL']}" target="_blank" class="prod-link">${d['商品名']}</a></td><td>¥${(parseInt(d['商品代金'])||0).toLocaleString()}</td></tr>`);
+            document.getElementById('resaleTable').innerHTML = hR + `</tbody></table>`;
+        }
+
+        // --- CHART HELPERS ---
         function drawBar(id, labels, values, color) {
             if(charts[id]) charts[id].destroy();
             charts[id] = new Chart(document.getElementById(id), {
                 type: 'bar', data: { labels, datasets: [{ data: values, backgroundColor: color, borderRadius: 8 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
             });
         }
-
+        function drawSalesChart(id, labels, profits, counts) {
+            if(charts[id]) charts[id].destroy();
+            charts[id] = new Chart(document.getElementById(id), {
+                type: 'bar', data: { labels, datasets: [{ label: '利益', data: profits, backgroundColor: '#66BB6A', yAxisID: 'y' }, { label: '件数', data: counts, type: 'line', borderColor: '#FF7043', borderWidth: 3, pointRadius: 4, yAxisID: 'y1' }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { position: 'left' }, y1: { position: 'right', grid: { display: false } } } }
+            });
+        }
         function drawPie(id, labels, values) {
             if(charts[id]) charts[id].destroy();
             charts[id] = new Chart(document.getElementById(id), {
-                type: 'doughnut', data: { labels, datasets: [{ data: values, backgroundColor: ['#2196F3', '#FF9800', '#66BB6A', '#F06292', '#FFEB3B', '#9C27B0', '#00BCD4'] }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } }, cutout: '55%' }
+                type: 'doughnut', data: { labels, datasets: [{ data: values, backgroundColor: ['#2196F3', '#FF9800', '#66BB6A', '#F06292', '#FFEB3B', '#9C27B0'] }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, cutout: '55%' }
             });
         }
     </script>
