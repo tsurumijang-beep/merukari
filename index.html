@@ -43,11 +43,11 @@
         .menu-btn {            
             background: var(--accent-blue); color: white; padding: 11px; border-radius: 16px;            
             text-align: center; border: none; box-shadow: var(--btn-shadow); cursor: pointer; font-weight: 700; transition: 0.2s;            
-            font-size: 0.9rem; width: 100%;
+            font-size: 0.9rem; width: 100%; display: flex; justify-content: space-between; align-items: center; padding-left: 14px; padding-right: 14px;
         }        
         .menu-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
         .upload-label { background: white; color: var(--accent-blue); font-size: 0.8rem; border: 2px solid #BBDEFB; margin-top: 4px; cursor: pointer; border-radius: 14px; padding: 9px; text-align: center; box-shadow: var(--btn-shadow); display: block; }
-        .run-btn { background: var(--accent-orange) !important; margin-top: 4px; font-size: 1rem; padding: 11px !important; }
+        .run-btn { background: var(--accent-orange) !important; margin-top: 4px; font-size: 1rem; padding: 11px !important; justify-content: center !important; }
         
         main { 
             flex: 1; 
@@ -80,8 +80,67 @@
         .page-content { display: none; width: 100%; animation: fadeIn 0.3s; }
         .active-page { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* 4桁管理番号手動販売処理バー */
+        .manual-input-box {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 12px 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--clay-shadow);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 3px solid #E1F5FE;
+        }
+        .manual-input-box label {
+            font-weight: 900;
+            color: #0277BD;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .manual-input-box input[type="text"] {
+            padding: 8px 14px;
+            border: 2px solid #B3E5FC;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            width: 150px;
+            outline: none;
+            transition: 0.2s;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        .manual-input-box input[type="text"]:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 8px rgba(33, 150, 243, 0.3);
+        }
+        .manual-btn {
+            background: var(--accent-orange);
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: var(--btn-shadow);
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+        .manual-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+        .manual-hint {
+            font-size: 0.8rem;
+            color: #78909C;
+            margin-left: auto;
+        }
         
-        /* 28인치 최적화 그리드 레이아웃 */
+        /* 28インチ最適化グリッドレイアウト */
         .dashboard-grid { 
             display: grid; 
             grid-template-columns: repeat(12, 1fr); 
@@ -110,7 +169,7 @@
             border: 4px solid white; 
             display: flex; 
             flex-direction: column; 
-            min-width: 0; /* 내용물 넘침 방지 */
+            min-width: 0;
         }
         .card h3 { margin: 0 0 8px 0; color: #555; font-size: 0.95rem; font-weight: 900; }
         .chart-container { 
@@ -120,7 +179,7 @@
             width: 100%; 
         }
 
-        /* 월별 매출 및 비용 복사용 영역 */
+        /* 月別売上・費用コピー用エリア */
         .monthly-summary-wrapper {
             margin-top: 10px;
             padding-top: 10px;
@@ -165,6 +224,8 @@
         }
         
         .table-card { background: white; border-radius: 24px; padding: 20px; box-shadow: var(--clay-shadow); border: 4px solid white; overflow-x: auto; }
+        .table-card h3 { font-size: 1.15rem; color: #1565C0; margin-top: 0; display: flex; align-items: center; justify-content: space-between; }
+        .table-count-badge { background: #E1F5FE; color: #0277BD; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 8px; }
         th { background: #E3F2FD; padding: 10px 12px; text-align: left; cursor: pointer; border-bottom: 2px solid #ddd; position: relative; user-select: none; }
         th:hover { background: #BBDEFB; }
@@ -186,9 +247,18 @@
 <body>
     <nav>        
         <div class="logo" onclick="showPage('dashboardPage')">Dashboard</div>        
-        <button class="menu-btn" onclick="showPage('allStockPage')">全在庫一覧</button>        
-        <button class="menu-btn" onclick="showPage('salesListPage')">販売品一覧</button>        
-        <button class="menu-btn" onclick="showPage('resalePage')">再出品予定</button>        
+        <button class="menu-btn" onclick="showPage('allStockPage')">
+            <span>全在庫一覧</span>
+            <span id="menu-stock-count" style="font-size:0.8rem; background:rgba(255,255,255,0.25); padding:2px 8px; border-radius:10px;">0</span>
+        </button>        
+        <button class="menu-btn" onclick="showPage('salesListPage')">
+            <span>販売品一覧</span>
+            <span id="menu-sales-count" style="font-size:0.8rem; background:rgba(255,255,255,0.25); padding:2px 8px; border-radius:10px;">0</span>
+        </button>        
+        <button class="menu-btn" onclick="showPage('resalePage')">
+            <span>再出品予定</span>
+            <span id="menu-resale-count" style="font-size:0.8rem; background:rgba(255,255,255,0.25); padding:2px 8px; border-radius:10px;">0</span>
+        </button>        
         <hr>        
         <label for="listingCsv" class="upload-label">📁 在庫一覧 CSV 選択</label>
         <input type="file" id="listingCsv" accept=".csv">
@@ -202,7 +272,7 @@
         
         <hr>
         <div style="font-size: 0.75rem; color: #444; text-align: center; font-weight: 700; margin-bottom: 2px;">データバックアップ</div>
-        <button class="menu-btn" style="background:#78909C;" onclick="exportData()">💾 JSONエクスポート</button>
+        <button class="menu-btn" style="background:#78909C; justify-content:center;" onclick="exportData()">💾 JSONエクスポート</button>
         <label for="importJson" class="upload-label" style="background:#ECEFF1; color:#37474F;">📂 JSONインポート</label>
         <input type="file" id="importJson" accept=".json">
     </nav>
@@ -213,10 +283,18 @@
             <div class="header-widget stat-stock">現在庫数（ <span id="count-stock">-</span> ）個</div>            
             <div class="header-widget stat-sales">今月販売数（ <span id="count-sales-month">-</span> ）個</div>            
             <div class="clock-card" id="current-time"></div>
-            <button class="copy-source-btn" onclick="copyCurrentSource()">📋 HTML 전체 복사</button>
+            <button class="copy-source-btn" onclick="copyCurrentSource()">📋 HTML全体コピー</button>
         </header>
         
-        <div id="dashboardPage" class="page-content active-page">            
+        <div id="dashboardPage" class="page-content active-page">
+            <!-- 4桁管理番号手動販売処理バー -->
+            <div class="manual-input-box">
+                <label for="manualStockCode">🏷️ 管理番号（4桁）販売処理:</label>
+                <input type="text" id="manualStockCode" placeholder="例: 1249" maxlength="10">
+                <button class="manual-btn" onclick="processManualSold()">販売完了処理</button>
+                <div class="manual-hint">※ 番号を入力すると「全在庫一覧」から除外され、「販売品一覧」へ即時反映されます。</div>
+            </div>
+
             <div class="dashboard-grid">                
                 <div class="card col-inv">                    
                     <h3>出品月別_在庫数 (実データ集計)</h3>                    
@@ -245,9 +323,33 @@
             </div>        
         </div>
         
-        <div id="allStockPage" class="page-content"><div class="table-card"><h3>全在庫一覧</h3><div id="allStockTable"></div></div></div>        
-        <div id="salesListPage" class="page-content"><div class="table-card"><h3>販売品一覧</h3><div id="salesListTable"></div></div></div>        
-        <div id="resalePage" class="page-content"><div class="table-card"><h3>再出品予定リスト</h3><div id="resaleTable"></div></div></div>    
+        <div id="allStockPage" class="page-content">
+            <div class="table-card">
+                <h3>
+                    <span>全在庫一覧</span>
+                    <span class="table-count-badge" id="badge-stock-count">全 0 件</span>
+                </h3>
+                <div id="allStockTable"></div>
+            </div>
+        </div>        
+        <div id="salesListPage" class="page-content">
+            <div class="table-card">
+                <h3>
+                    <span>販売品一覧</span>
+                    <span class="table-count-badge" id="badge-sales-count">全 0 件</span>
+                </h3>
+                <div id="salesListTable"></div>
+            </div>
+        </div>        
+        <div id="resalePage" class="page-content">
+            <div class="table-card">
+                <h3>
+                    <span>再出品予定リスト</span>
+                    <span class="table-count-badge" id="badge-resale-count">全 0 件</span>
+                </h3>
+                <div id="resaleTable"></div>
+            </div>
+        </div>    
     </main>
 
     <script>        
@@ -258,9 +360,13 @@
 
         window.onload = () => {            
             updateTime();            
-            if (rawListing.length > 0 || rawSales.length > 0) {
-                updateAllUI();
-            }
+            removeSoldFromListing();
+            updateAllUI();
+
+            // 手動入力のEnterキーイベント
+            document.getElementById('manualStockCode').addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') processManualSold();
+            });
         };        
         setInterval(updateTime, 1000);
 
@@ -273,7 +379,7 @@
         function copyCurrentSource() {
             const htmlSource = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
             navigator.clipboard.writeText(htmlSource).then(() => {
-                alert("전체 HTML 코드가 클립보드에 복사되었습니다!");
+                alert("HTMLコード全体がクリップボードにコピーされました！");
             }).catch(() => {
                 const ta = document.createElement("textarea");
                 ta.value = htmlSource;
@@ -281,7 +387,7 @@
                 ta.select();
                 document.execCommand("copy");
                 document.body.removeChild(ta);
-                alert("전체 HTML 코드가 클립보드에 복사되었습니다!");
+                alert("HTMLコード全体がクリップボードにコピーされました！");
             });
         }
 
@@ -294,6 +400,104 @@
         document.getElementById('listingCsv').onchange = e => { if(e.target.files[0]) document.getElementById('listing-status').innerText = "✅ " + e.target.files[0].name; };        
         document.getElementById('salesCsv').onchange = e => { if(e.target.files[0]) document.getElementById('sales-status').innerText = "✅ " + e.target.files[0].name; };
 
+        // 4桁管理番号抽出用ヘルパー関数
+        function extract4DigitCode(str) {
+            if (!str) return null;
+            const match = str.match(/\b(\d{4})\b/) || str.match(/[\s _-](\d{4})[\s _-]/) || str.match(/(\d{4})/);
+            return match ? match[1] : null;
+        }
+
+        // 販売履歴と一致する在庫を自動除外
+        function removeSoldFromListing() {
+            if (!rawSales.length || !rawListing.length) return 0;
+            
+            const soldIds = new Set();
+            const soldUrls = new Set();
+            const soldCodes = new Set();
+
+            rawSales.forEach(s => {
+                if (s['商品ID']) soldIds.add(String(s['商品ID']).trim());
+                if (s['商品URL']) soldUrls.add(String(s['商品URL']).trim());
+                const code = extract4DigitCode(s['商品名']);
+                if (code) soldCodes.add(code);
+            });
+
+            const initialCount = rawListing.length;
+            rawListing = rawListing.filter(item => {
+                const id = String(item['商品ID'] || '').trim();
+                const url = String(item['商品URL'] || '').trim();
+                const code = extract4DigitCode(item['商品名']);
+
+                if (id && soldIds.has(id)) return false;
+                if (url && soldUrls.has(url)) return false;
+                if (code && soldCodes.has(code)) return false;
+                return true;
+            });
+
+            const removedCount = initialCount - rawListing.length;
+            if (removedCount > 0) {
+                localStorage.setItem('mercari_last_listing', JSON.stringify(rawListing));
+            }
+            return removedCount;
+        }
+
+        // 4桁管理番号の手動販売完了処理
+        function processManualSold() {
+            const inputEl = document.getElementById('manualStockCode');
+            const code = (inputEl.value || '').trim();
+
+            if (!code) {
+                alert("管理番号（4桁）を入力してください。");
+                inputEl.focus();
+                return;
+            }
+
+            const foundIndex = rawListing.findIndex(item => {
+                const itemCode = extract4DigitCode(item['商品名']);
+                return itemCode === code || (item['商品名'] && item['商品名'].includes(code));
+            });
+
+            if (foundIndex === -1) {
+                alert(`管理番号 [ ${code} ] に該当する商品を「全在庫一覧」で見つけることができませんでした。`);
+                return;
+            }
+
+            const matchedItem = rawListing.splice(foundIndex, 1)[0];
+
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            const ss = String(now.getSeconds()).padStart(2, '0');
+            const nowStr = `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
+
+            const price = parseInt(String(matchedItem['商品代金'] || "0").replace(/[^0-9]/g, "")) || 0;
+            const fee = Math.floor(price * 0.1);
+            const profit = price - fee;
+
+            const newSoldItem = {
+                '購入完了日': nowStr,
+                '商品ID': matchedItem['商品ID'] || ('manual_' + Date.now()),
+                '商品名': matchedItem['商品名'] || `手動販売商品 (${code})`,
+                '商品URL': matchedItem['商品URL'] || '#',
+                '商品代金': price.toString(),
+                '販売利益': profit.toString(),
+                '配送の方法': matchedItem['配送の方法'] || 'ゆうゆうメルカリ便'
+            };
+
+            rawSales.unshift(newSoldItem);
+
+            localStorage.setItem('mercari_last_listing', JSON.stringify(rawListing));
+            localStorage.setItem('mercari_last_sales', JSON.stringify(rawSales));
+
+            updateAllUI();
+
+            alert(`✅ 管理番号 [ ${code} ] の販売処理が完了しました！\n\n・商品名: ${matchedItem['商品名']}\n・価格: ¥${price.toLocaleString()}\n「全在庫一覧」から除外され、「販売品一覧」に反映されました。`);
+            inputEl.value = '';
+        }
+
         document.getElementById('applyBtn').onclick = function() {            
             const lFile = document.getElementById('listingCsv').files[0];            
             const sFile = document.getElementById('salesCsv').files[0];            
@@ -302,8 +506,9 @@
 
             if (target === 0) {
                 if (rawListing.length > 0 || rawSales.length > 0) {
+                    const removed = removeSoldFromListing();
                     updateAllUI();
-                    alert("保存されている既存データを反映しました。");
+                    alert(`保存されている既存データを反映しました。${removed > 0 ? `\n(販売済み在庫 ${removed}件を除外)` : ''}`);
                 } else {
                     alert("反映するファイルが選択されておらず、保存データもありません。");
                 }
@@ -334,8 +539,9 @@
             function check() { 
                 loaded++; 
                 if(loaded === target) { 
+                    const removed = removeSoldFromListing();
                     updateAllUI(); 
-                    alert("新しいデータを反映しました。"); 
+                    alert(`新しいデータを反映しました。${removed > 0 ? `\n(販売済みの在庫 ${removed}件が「全在庫一覧」から自動除外されました)` : ''}`); 
                 } 
             }        
         };
@@ -359,14 +565,15 @@
                     const imported = JSON.parse(event.target.result);
                     if(imported.listing) {
                         rawListing = imported.listing;
-                        localStorage.setItem('mercari_last_listing', JSON.stringify(rawListing));
                     }
                     if(imported.sales) {
                         rawSales = imported.sales;
-                        localStorage.setItem('mercari_last_sales', JSON.stringify(rawSales));
                     }
+                    removeSoldFromListing();
+                    localStorage.setItem('mercari_last_listing', JSON.stringify(rawListing));
+                    localStorage.setItem('mercari_last_sales', JSON.stringify(rawSales));
                     updateAllUI();
-                    alert("バックアップデータが正常にインポートされました。");
+                    alert("バックアップデータが正常にインポートされ、反映されました。");
                 } catch(err) {
                     alert("JSONファイルの読み込みに失敗しました。");
                 }
@@ -375,11 +582,24 @@
         };
 
         function updateAllUI() {            
-            document.getElementById('count-stock').innerText = rawListing.length;            
+            const stockCount = rawListing.length;
+            const salesCount = rawSales.length;
+
             const curM = (new Date().getMonth()+1).toString().padStart(2,'0');            
             const curY = new Date().getFullYear();            
             const salesM = rawSales.filter(d => (d['購入完了日']||"").includes(`${curY}-${curM}`)).length;            
-            document.getElementById('count-sales-month').innerText = salesM;
+
+            // ヘッダー件数
+            document.getElementById('count-stock').innerText = stockCount.toLocaleString();            
+            document.getElementById('count-sales-month').innerText = salesM.toLocaleString();
+
+            // ナビゲーション件数
+            document.getElementById('menu-stock-count').innerText = `${stockCount}件`;
+            document.getElementById('menu-sales-count').innerText = `${salesCount}件`;
+
+            // ページ上部バッジ件数
+            document.getElementById('badge-stock-count').innerText = `全 ${stockCount.toLocaleString()} 件`;
+            document.getElementById('badge-sales-count').innerText = `全 ${salesCount.toLocaleString()} 件`;
 
             renderCharts();            
             rebuildTables();        
@@ -406,7 +626,8 @@
                     const parts = dateStr.split('-');                    
                     const label = `${parts[0].slice(-2)}-${parts[1]}`;                    
                     invMap[label] = (invMap[label] || 0) + 1;                
-                }            });            
+                }            
+            });            
             const invLabels = Object.keys(invMap).sort();            
             drawBar('inventoryChart', invLabels, invLabels.map(l => invMap[l]), '#2196F3');
 
@@ -418,7 +639,8 @@
             rawSales.forEach(d => { const m = d['配送の方法']||"未定"; ships[m] = (ships[m]||0)+1; });            
             document.getElementById('shipping-list').innerHTML = Object.keys(ships).map(m => {                
                 const pct = Math.round((ships[m]/(rawSales.length||1))*100);                
-                return `<div class="shipping-item">${m} (${pct}%)<div class="progress-bg"><div class="progress-bar" style="width:${pct}%"></div></div></div>`;            }).join('');
+                return `<div class="shipping-item">${m} (${pct}%)<div class="progress-bg"><div class="progress-bar" style="width:${pct}%"></div></div></div>`;            
+            }).join('');
 
             const saleProfits = {}, saleCounts = {}, saleRevenues = {}, saleCosts = {};            
             rawSales.forEach(d => {                
@@ -434,11 +656,12 @@
                     saleCounts[label] = (saleCounts[label] || 0) + 1;
                     saleRevenues[label] = (saleRevenues[label] || 0) + r;
                     saleCosts[label] = (saleCosts[label] || 0) + c;
-                }            });            
+                }            
+            });            
             const saleLabels = Object.keys(saleProfits).sort();            
             drawSalesChart('salesChart', saleLabels, saleLabels.map(l => saleProfits[l]), saleLabels.map(l => saleCounts[l]));
 
-            // 월별 매출 및 비용 텍스트 바
+            // 月別売上・費用テキストバー
             const summaryHtml = saleLabels.map(label => `
                 <div class="monthly-data-badge">
                     <div class="badge-month">${label}</div>
@@ -465,7 +688,8 @@
                 }                
                 if (vA < vB) return direction === 'asc' ? -1 : 1;                
                 if (vA > vB) return direction === 'asc' ? 1 : -1;                
-                return 0;            });        
+                return 0;            
+            });        
         }
 
         function triggerSort(tableId, key) {            
@@ -483,12 +707,12 @@
         function rebuildTables() {            
             let dataA = sortTableData(rawListing, sortState.allStock.key, sortState.allStock.dir);            
             let hA = `<table><thead><tr><th class="${getCls('allStock','出品日時')}" onclick="triggerSort('allStock','出品日時')">出品日時</th><th>種類</th><th onclick="triggerSort('allStock','商品名')">商品名</th><th class="${getCls('allStock','商品代金')}" onclick="triggerSort('allStock','商品代金')">価格</th><th class="${getCls('allStock','いいね！')}" onclick="triggerSort('allStock','いいね！')">いいね</th></tr></thead><tbody>`;            
-            dataA.forEach(d => hA += `<tr><td>${d['出品日時']||'-'}</td><td>${categorize(d['商品名'])}</td><td><a href="${d['商品URL']}" target="_blank" class="prod-link">${d['商品名']}</a></td><td>¥${(parseInt(d['商品代金'])||0).toLocaleString()}</td><td>${d['いいね！']||0}</td></tr>`);            
+            dataA.forEach(d => hA += `<tr><td>${d['出品日時']||'-'}</td><td>${categorize(d['商品名'])}</td><td><a href="${d['商品URL']||'#'}" target="_blank" class="prod-link">${d['商品名']}</a></td><td>¥${(parseInt(d['商品代金'])||0).toLocaleString()}</td><td>${d['いいね！']||0}</td></tr>`);            
             document.getElementById('allStockTable').innerHTML = hA + `</tbody></table>`;
 
             let dataS = sortTableData(rawSales, sortState.salesList.key, sortState.salesList.dir);            
             let hS = `<table><thead><tr><th class="${getCls('salesList','購入完了日')}" onclick="triggerSort('salesList','購入完了日')">完了日</th><th onclick="triggerSort('salesList','商品名')">商品名</th><th class="${getCls('salesList','商品代金')}" onclick="triggerSort('salesList','商品代金')">価格</th><th class="${getCls('salesList','販売利益')}" onclick="triggerSort('salesList','販売利益')">利益</th></tr></thead><tbody>`;            
-            dataS.forEach(d => hS += `<tr><td>${d['購入完了日']||'-'}</td><td><a href="${d['商品URL']}" target="_blank" class="prod-link">${d['商品名']}</a></td><td>¥${(parseInt(d['商品代金'])||0).toLocaleString()}</td><td>¥${(parseInt(d['販売利益'])||0).toLocaleString()}</td></tr>`);            
+            dataS.forEach(d => hS += `<tr><td>${d['購入完了日']||'-'}</td><td><a href="${d['商品URL']||'#'}" target="_blank" class="prod-link">${d['商品名']}</a></td><td>¥${(parseInt(d['商品代金'])||0).toLocaleString()}</td><td>¥${(parseInt(d['販売利益'])||0).toLocaleString()}</td></tr>`);            
             document.getElementById('salesListTable').innerHTML = hS + `</tbody></table>`;
 
             const today = new Date();            
@@ -500,9 +724,14 @@
                 ...d, 
                 elapsed: Math.ceil(Math.abs(today - new Date(d['出品日時']))/(1000*60*60*24))
             }));            
+
+            // 再出品予定件数の更新
+            document.getElementById('menu-resale-count').innerText = `${dataR.length}件`;
+            document.getElementById('badge-resale-count').innerText = `全 ${dataR.length.toLocaleString()} 件`;
+
             dataR = sortTableData(dataR, sortState.resale.key, sortState.resale.dir);            
             let hR = `<table><thead><tr><th class="${getCls('resale','出品日時')}" onclick="triggerSort('resale','出品日時')">出品日時</th><th class="${getCls('resale','elapsed')}" onclick="triggerSort('resale','elapsed')">経過日数</th><th onclick="triggerSort('resale','商品名')">商品名</th><th class="${getCls('resale','商品代金')}" onclick="triggerSort('resale','商品代金')">価格</th></tr></thead><tbody>`;            
-            dataR.forEach(d => hR += `<tr><td>${d['出品日時']||'-'}</td><td style="color:red; font-weight:bold;">${d.elapsed}日</td><td><a href="${d['商品URL']}" target="_blank" class="prod-link">${d['商品名']}</a></td><td>¥${(parseInt(d['商品代金'])||0).toLocaleString()}</td></tr>`);            
+            dataR.forEach(d => hR += `<tr><td>${d['出品日時']||'-'}</td><td style="color:red; font-weight:bold;">${d.elapsed}日</td><td><a href="${d['商品URL']||'#'}" target="_blank" class="prod-link">${d['商品名']}</a></td><td>¥${(parseInt(d['商品代金'])||0).toLocaleString()}</td></tr>`);            
             document.getElementById('resaleTable').innerHTML = hR + `</tbody></table>`;        
         }
 
@@ -510,7 +739,8 @@
             if(charts[id]) charts[id].destroy();            
             charts[id] = new Chart(document.getElementById(id), {                
                 type: 'bar', data: { labels, datasets: [{ data: values, backgroundColor: color, borderRadius: 6 }] },                
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }            });        
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }            
+            });        
         }
 
         function drawSalesChart(id, labels, profits, counts) {            
@@ -548,7 +778,8 @@
             if(charts[id]) charts[id].destroy();            
             charts[id] = new Chart(document.getElementById(id), {                
                 type: 'doughnut', data: { labels, datasets: [{ data: values, backgroundColor: ['#2196F3', '#FF9800', '#66BB6A', '#F06292', '#FFEB3B', '#9C27B0'] }] },                
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, cutout: '55%' }            });        
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, cutout: '55%' }            
+            });        
         }
     </script>
 </body>
