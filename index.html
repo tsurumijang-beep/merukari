@@ -15,14 +15,15 @@
             --accent-orange: #FF7043;
             --accent-green: #66BB6A;
             --mercari-red: #FF0000;
-            --clay-shadow: 14px 14px 28px rgba(0,0,0,0.08), inset -8px -8px 12px rgba(0,0,0,0.04), inset 8px 8px 12px rgba(255,255,255,0.8);
-            --btn-shadow: 6px 6px 12px rgba(0,0,0,0.1), inset -3px -3px 6px rgba(0,0,0,0.1), inset 3px 3px 6px rgba(255,255,255,0.5);
+            --clay-shadow: 10px 10px 20px rgba(0,0,0,0.06), inset -6px -6px 10px rgba(0,0,0,0.03), inset 6px 6px 10px rgba(255,255,255,0.8);
+            --btn-shadow: 4px 4px 8px rgba(0,0,0,0.08), inset -2px -2px 4px rgba(0,0,0,0.08), inset 2px 2px 4px rgba(255,255,255,0.5);
         }
         * { box-sizing: border-box; }
-        body { 
+        html, body { 
             background-color: var(--bg-color); 
             font-family: 'Noto Sans JP', sans-serif; 
             margin: 0; 
+            padding: 0;
             display: flex; 
             height: 100vh; 
             width: 100vw;
@@ -30,85 +31,100 @@
             color: #333; 
         }                
         nav { 
-            width: 250px; 
-            min-width: 250px;
-            padding: 20px 18px; 
+            width: 240px; 
+            min-width: 240px;
+            padding: 16px 14px; 
             display: flex; 
             flex-direction: column; 
-            gap: 10px; 
+            gap: 8px; 
             z-index: 100; 
             overflow-y: auto; 
+            height: 100vh;
         }
-        .logo { font-size: 2rem; font-weight: 900; margin-bottom: 10px; color: #1A237E; cursor: pointer; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }                
+        .logo { font-size: 1.8rem; font-weight: 900; margin-bottom: 6px; color: #1A237E; cursor: pointer; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }                
         .menu-btn {            
-            background: var(--accent-blue); color: white; padding: 11px; border-radius: 16px;            
+            background: var(--accent-blue); color: white; padding: 9px 12px; border-radius: 14px;            
             text-align: center; border: none; box-shadow: var(--btn-shadow); cursor: pointer; font-weight: 700; transition: 0.2s;            
-            font-size: 0.9rem; width: 100%; display: flex; justify-content: space-between; align-items: center; padding-left: 14px; padding-right: 14px;
+            font-size: 0.85rem; width: 100%; display: flex; justify-content: space-between; align-items: center;
         }        
         .menu-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
-        .upload-label { background: white; color: var(--accent-blue); font-size: 0.8rem; border: 2px solid #BBDEFB; margin-top: 4px; cursor: pointer; border-radius: 14px; padding: 9px; text-align: center; box-shadow: var(--btn-shadow); display: block; }
-        .run-btn { background: var(--accent-orange) !important; margin-top: 4px; font-size: 1rem; padding: 11px !important; justify-content: center !important; }
+        .upload-label { background: white; color: var(--accent-blue); font-size: 0.75rem; border: 2px solid #BBDEFB; margin-top: 2px; cursor: pointer; border-radius: 12px; padding: 7px; text-align: center; box-shadow: var(--btn-shadow); display: block; font-weight: 700; }
+        .run-btn { background: var(--accent-orange) !important; margin-top: 2px; font-size: 0.95rem; padding: 9px !important; justify-content: center !important; }
         
         main { 
             flex: 1; 
-            padding: 16px 24px; 
-            overflow-y: auto; 
+            padding: 12px 20px 14px 20px; 
             display: flex; 
             flex-direction: column; 
-            max-width: 1920px;
-            margin: 0 auto;
+            height: 100vh;
+            overflow: hidden;
             width: 100%;
         }                
-        header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
-        .header-widget {            
-            padding: 8px 20px; border-radius: 14px; font-weight: 900; font-size: 1.05rem;            
-            box-shadow: var(--clay-shadow); border: 2px solid rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: center;        
+        header { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            margin-bottom: 10px; 
+            flex-wrap: nowrap; 
+            height: 42px;
+            min-height: 42px;
         }
-        .mercari-logo { background: var(--mercari-red); color: white; min-width: 150px; letter-spacing: 4px; }
-        .stat-stock { background: #000; color: white; min-width: 160px; }
-        .stat-sales { background: #448AFF; color: white; min-width: 160px; }
-        .clock-card { background: #64B5F6; color: white; margin-left: auto; border-radius: 40px; font-size: 0.95rem; padding: 8px 20px; box-shadow: var(--clay-shadow); font-weight: 700; }
+        .header-widget {            
+            padding: 6px 16px; border-radius: 12px; font-weight: 900; font-size: 0.95rem;            
+            box-shadow: var(--clay-shadow); border: 2px solid rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: center; height: 100%;       
+        }
+        .mercari-logo { background: var(--mercari-red); color: white; min-width: 130px; letter-spacing: 3px; }
+        .stat-stock { background: #000; color: white; min-width: 150px; }
+        .stat-sales { background: #448AFF; color: white; min-width: 150px; }
+        .clock-card { background: #64B5F6; color: white; margin-left: auto; border-radius: 40px; font-size: 0.88rem; padding: 6px 18px; box-shadow: var(--clay-shadow); font-weight: 700; height: 100%; display: flex; align-items: center; }
         
         .copy-source-btn {
-            background: #455A64; color: white; border: none; padding: 8px 16px; border-radius: 40px;
-            font-size: 0.85rem; font-weight: 700; cursor: pointer; box-shadow: var(--btn-shadow);
-            transition: 0.2s; display: flex; align-items: center; gap: 6px;
+            background: #455A64; color: white; border: none; padding: 6px 14px; border-radius: 40px;
+            font-size: 0.8rem; font-weight: 700; cursor: pointer; box-shadow: var(--btn-shadow);
+            transition: 0.2s; display: flex; align-items: center; gap: 6px; height: 100%;
         }
-        .copy-source-btn:hover { background: #37474F; transform: translateY(-2px); }
-        .copy-source-btn:active { transform: translateY(0); }
+        .copy-source-btn:hover { background: #37474F; transform: translateY(-1px); }
 
-        .page-content { display: none; width: 100%; animation: fadeIn 0.3s; }
-        .active-page { display: block; }
+        .page-content { 
+            display: none; 
+            width: 100%; 
+            flex: 1;
+            height: calc(100vh - 66px);
+            animation: fadeIn 0.2s; 
+        }
+        .active-page { display: flex; flex-direction: column; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* 4桁管理番号手動販売処理バー */
         .manual-input-box {
             background: #ffffff;
-            border-radius: 20px;
-            padding: 12px 20px;
-            margin-bottom: 16px;
+            border-radius: 16px;
+            padding: 8px 16px;
+            margin-bottom: 10px;
             box-shadow: var(--clay-shadow);
             display: flex;
             align-items: center;
-            gap: 12px;
-            border: 3px solid #E1F5FE;
+            gap: 10px;
+            border: 2px solid #E1F5FE;
+            height: 46px;
+            min-height: 46px;
         }
         .manual-input-box label {
             font-weight: 900;
             color: #0277BD;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             display: flex;
             align-items: center;
             gap: 6px;
             white-space: nowrap;
         }
         .manual-input-box input[type="text"] {
-            padding: 8px 14px;
+            padding: 5px 12px;
             border: 2px solid #B3E5FC;
-            border-radius: 12px;
-            font-size: 0.95rem;
+            border-radius: 10px;
+            font-size: 0.88rem;
             font-weight: 700;
-            width: 150px;
+            width: 130px;
             outline: none;
             transition: 0.2s;
             text-align: center;
@@ -116,96 +132,95 @@
         }
         .manual-input-box input[type="text"]:focus {
             border-color: var(--accent-blue);
-            box-shadow: 0 0 8px rgba(33, 150, 243, 0.3);
         }
         .manual-btn {
             background: var(--accent-orange);
             color: white;
             border: none;
-            padding: 8px 18px;
-            border-radius: 12px;
+            padding: 6px 14px;
+            border-radius: 10px;
             font-weight: 800;
             cursor: pointer;
             box-shadow: var(--btn-shadow);
             transition: 0.2s;
             white-space: nowrap;
+            font-size: 0.82rem;
         }
-        .manual-btn:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.1);
-        }
+        .manual-btn:hover { filter: brightness(1.1); }
         .manual-hint {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #78909C;
             margin-left: auto;
         }
         
-        /* 28インチ最適化グリッドレイアウト */
+        /* 28インチ画面最適化: 2段完全フィットグリッド */
         .dashboard-grid { 
             display: grid; 
             grid-template-columns: repeat(12, 1fr); 
-            gap: 16px; 
-            align-items: stretch;
+            grid-template-rows: 1fr 1.15fr; /* 상하 2단 분할 */
+            gap: 12px; 
+            flex: 1;
+            height: calc(100% - 56px);
+            min-height: 0;
         }
         .col-inv { grid-column: span 5; }
         .col-type { grid-column: span 4; }
         .col-ship { grid-column: span 3; }
         .col-sales { grid-column: span 7; }
         .col-recent-sales { grid-column: span 5; }
-        .col-likes { grid-column: span 12; }
-
-        @media (max-width: 1400px) {
-            .col-inv { grid-column: span 6; }
-            .col-type { grid-column: span 6; }
-            .col-ship { grid-column: span 12; }
-            .col-sales { grid-column: span 12; }
-            .col-recent-sales { grid-column: span 12; }
-            .col-likes { grid-column: span 12; }
-        }
 
         .card { 
             background: var(--card-bg); 
-            border-radius: 24px; 
-            padding: 16px 18px; 
+            border-radius: 20px; 
+            padding: 12px 14px; 
             box-shadow: var(--clay-shadow); 
-            border: 4px solid white; 
+            border: 3px solid white; 
             display: flex; 
             flex-direction: column; 
             min-width: 0;
+            min-height: 0;
+            overflow: hidden;
         }
-        .card h3 { margin: 0 0 8px 0; color: #555; font-size: 0.95rem; font-weight: 900; }
+        .card h3 { 
+            margin: 0 0 6px 0; 
+            color: #555; 
+            font-size: 0.88rem; 
+            font-weight: 900; 
+            flex-shrink: 0;
+        }
         .chart-container { 
             position: relative; 
-            height: 240px; 
-            max-height: 32vh; 
+            flex: 1;
             width: 100%; 
+            min-height: 0;
         }
 
         /* 月別売上・費用コピー用エリア */
         .monthly-summary-wrapper {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 2px dashed #CFD8DC;
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px dashed #CFD8DC;
             user-select: text;
+            flex-shrink: 0;
         }
         .monthly-summary-title {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: #78909C;
             font-weight: 700;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
         .monthly-summary-container {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             overflow-x: auto;
-            padding-bottom: 4px;
+            padding-bottom: 2px;
         }
         .monthly-data-badge {
             background: white;
-            border-radius: 10px;
-            padding: 6px 10px;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.04);
-            font-size: 0.8rem;
+            border-radius: 8px;
+            padding: 4px 8px;
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.04);
+            font-size: 0.72rem;
             white-space: nowrap;
             user-select: text;
         }
@@ -214,48 +229,59 @@
             color: #37474F;
             margin-bottom: 2px;
             border-bottom: 1px solid #ECEFF1;
-            padding-bottom: 2px;
+            padding-bottom: 1px;
         }
-        .badge-rev {
-            color: #1565C0;
-            font-weight: 700;
-        }
-        .badge-cost {
-            color: #C62828;
-            font-weight: 700;
-        }
+        .badge-rev { color: #1565C0; font-weight: 700; }
+        .badge-cost { color: #C62828; font-weight: 700; }
         
-        .table-card { background: white; border-radius: 24px; padding: 20px; box-shadow: var(--clay-shadow); border: 4px solid white; overflow-x: auto; }
-        .table-card h3 { font-size: 1.15rem; color: #1565C0; margin-top: 0; display: flex; align-items: center; justify-content: space-between; }
-        .table-count-badge { background: #E1F5FE; color: #0277BD; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 8px; }
-        th { background: #E3F2FD; padding: 10px 12px; text-align: left; cursor: pointer; border-bottom: 2px solid #ddd; position: relative; user-select: none; }
+        .table-card { 
+            background: white; 
+            border-radius: 20px; 
+            padding: 16px; 
+            box-shadow: var(--clay-shadow); 
+            border: 3px solid white; 
+            overflow: auto;
+            flex: 1;
+            height: 100%;
+        }
+        .table-card h3 { font-size: 1.05rem; color: #1565C0; margin-top: 0; display: flex; align-items: center; justify-content: space-between; }
+        .table-count-badge { background: #E1F5FE; color: #0277BD; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 4px; }
+        th { background: #E3F2FD; padding: 8px 10px; text-align: left; cursor: pointer; border-bottom: 2px solid #ddd; position: relative; user-select: none; }
         th:hover { background: #BBDEFB; }
         th.sort-asc::after { content: " ▲"; color: var(--accent-blue); }
         th.sort-desc::after { content: " ▼"; color: var(--accent-blue); }
-        td { padding: 10px 12px; border-bottom: 1px solid #eee; }
+        td { padding: 8px 10px; border-bottom: 1px solid #eee; }
         .prod-link { color: #2196F3; text-decoration: underline; font-weight: bold; cursor: pointer; }
         
-        .shipping-item { margin-bottom: 10px; font-size: 0.82rem; font-weight: 700; }
-        .progress-bg { background: #D1D9E6; height: 10px; border-radius: 50px; overflow: hidden; margin-top: 4px; }
-        .progress-bar { height: 100%; background: var(--accent-blue); transition: width 1s; }
+        .shipping-item { margin-bottom: 8px; font-size: 0.78rem; font-weight: 700; }
+        .progress-bg { background: #D1D9E6; height: 8px; border-radius: 50px; overflow: hidden; margin-top: 3px; }
+        .progress-bar { height: 100%; background: var(--accent-blue); transition: width 0.8s; }
         
-        /* 最近の販売履歴 アイテム */
+        /* 最近の販売履歴 リスト (세로 스크롤 방지 가변 패딩) */
+        #recent-sales-list {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+        }
         .recent-sales-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 8px 4px;
+            padding: 4px 4px;
             border-bottom: 1px solid #ECEFF1;
-            font-size: 0.82rem;
-            gap: 8px;
+            font-size: 0.78rem;
+            gap: 10px;
         }
         .recent-sales-item:last-child { border-bottom: none; }
         .recent-date {
             color: #78909C;
-            font-size: 0.78rem;
+            font-size: 0.75rem;
             font-weight: 700;
-            min-width: 82px;
+            min-width: 78px;
             white-space: nowrap;
         }
         .recent-link {
@@ -271,12 +297,10 @@
             text-align: right;
             white-space: nowrap;
         }
-
-        .top-product { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 0.82rem; font-weight: 700; }
         
         input[type="file"] { display: none; }
-        .file-status { font-size: 0.75rem; color: #555; text-align: center; margin-bottom: 4px; }
-        hr { width:100%; border:0; border-top:1px dashed #999; margin:8px 0; }    
+        .file-status { font-size: 0.72rem; color: #555; text-align: center; margin-bottom: 3px; }
+        hr { width:100%; border:0; border-top:1px dashed #999; margin:6px 0; }    
     </style>
 </head>
 <body>
@@ -284,15 +308,15 @@
         <div class="logo" onclick="showPage('dashboardPage')">Dashboard</div>        
         <button class="menu-btn" onclick="showPage('allStockPage')">
             <span>全在庫一覧</span>
-            <span id="menu-stock-count" style="font-size:0.8rem; background:rgba(255,255,255,0.25); padding:2px 8px; border-radius:10px;">0</span>
+            <span id="menu-stock-count" style="font-size:0.75rem; background:rgba(255,255,255,0.25); padding:1px 6px; border-radius:8px;">0</span>
         </button>        
         <button class="menu-btn" onclick="showPage('salesListPage')">
             <span>販売品一覧</span>
-            <span id="menu-sales-count" style="font-size:0.8rem; background:rgba(255,255,255,0.25); padding:2px 8px; border-radius:10px;">0</span>
+            <span id="menu-sales-count" style="font-size:0.75rem; background:rgba(255,255,255,0.25); padding:1px 6px; border-radius:8px;">0</span>
         </button>        
         <button class="menu-btn" onclick="showPage('resalePage')">
             <span>再出品予定</span>
-            <span id="menu-resale-count" style="font-size:0.8rem; background:rgba(255,255,255,0.25); padding:2px 8px; border-radius:10px;">0</span>
+            <span id="menu-resale-count" style="font-size:0.75rem; background:rgba(255,255,255,0.25); padding:1px 6px; border-radius:8px;">0</span>
         </button>        
         <hr>        
         <label for="listingCsv" class="upload-label">📁 在庫一覧 CSV 選択</label>
@@ -306,7 +330,7 @@
         <button id="applyBtn" class="menu-btn run-btn">データを反映する</button>
         
         <hr>
-        <div style="font-size: 0.75rem; color: #444; text-align: center; font-weight: 700; margin-bottom: 2px;">データバックアップ</div>
+        <div style="font-size: 0.72rem; color: #444; text-align: center; font-weight: 700; margin-bottom: 2px;">データバックアップ</div>
         <button class="menu-btn" style="background:#78909C; justify-content:center;" onclick="exportData()">💾 JSONエクスポート</button>
         <label for="importJson" class="upload-label" style="background:#ECEFF1; color:#37474F;">📂 JSONインポート</label>
         <input type="file" id="importJson" accept=".json">
@@ -322,7 +346,6 @@
         </header>
         
         <div id="dashboardPage" class="page-content active-page">
-            <!-- 4桁管理番号手動販売処理バー -->
             <div class="manual-input-box">
                 <label for="manualStockCode">🏷️ 管理番号（4桁）販売処理:</label>
                 <input type="text" id="manualStockCode" placeholder="例: 1249" maxlength="10">
@@ -341,7 +364,7 @@
                 </div>                
                 <div class="card col-ship">                    
                     <h3>配送方法</h3>                    
-                    <div id="shipping-list"></div>                
+                    <div id="shipping-list" style="flex:1; overflow-y:auto;"></div>                
                 </div>                
                 <div class="card col-sales">                    
                     <h3>月別販売推移</h3>                    
@@ -351,14 +374,9 @@
                         <div class="monthly-summary-container" id="salesSummaryList"></div>
                     </div>
                 </div>                
-                <!-- 最近の販売履歴 直近7件 カード -->
                 <div class="card col-recent-sales">                    
-                    <h3>最近の販売履歴 (直近7件)</h3>                    
-                    <div id="recent-sales-list" style="display: flex; flex-direction: column; overflow-y: auto; max-height: 310px;"></div>                
-                </div>            
-                <div class="card col-likes">                    
-                    <h3>いいね！数上位</h3>                    
-                    <div id="likes-list"></div>                
+                    <h3>最近の販売履歴 (直近9件)</h3>                    
+                    <div id="recent-sales-list"></div>                
                 </div>            
             </div>        
         </div>
@@ -599,12 +617,8 @@
             reader.onload = function(event) {
                 try {
                     const imported = JSON.parse(event.target.result);
-                    if(imported.listing) {
-                        rawListing = imported.listing;
-                    }
-                    if(imported.sales) {
-                        rawSales = imported.sales;
-                    }
+                    if(imported.listing) rawListing = imported.listing;
+                    if(imported.sales) rawSales = imported.sales;
                     removeSoldFromListing();
                     localStorage.setItem('mercari_last_listing', JSON.stringify(rawListing));
                     localStorage.setItem('mercari_last_sales', JSON.stringify(rawSales));
@@ -701,21 +715,21 @@
                     <div class="badge-cost">費用: ¥${(saleCosts[label]||0).toLocaleString()}</div>
                 </div>
             `).join('');
-            document.getElementById('salesSummaryList').innerHTML = summaryHtml || '<div style="color:#999; font-size:0.8rem;">データがありません</div>';
+            document.getElementById('salesSummaryList').innerHTML = summaryHtml || '<div style="color:#999; font-size:0.75rem;">データがありません</div>';
 
-            // 최근 판매 리스트 7건 렌더링 (直近7件)
+            // 直近9件 販売履歴
             const recentSales = [...rawSales].sort((a, b) => {
                 const dateA = a['購入完了日'] || '';
                 const dateB = b['購入完了日'] || '';
                 return dateB.localeCompare(dateA);
-            }).slice(0, 7);
+            }).slice(0, 9);
 
             if (recentSales.length > 0) {
                 document.getElementById('recent-sales-list').innerHTML = recentSales.map(item => {
                     const fullDate = item['購入完了日'] || '-';
                     const shortDate = fullDate.length >= 10 ? fullDate.substring(0, 10) : fullDate;
                     const name = item['商品名'] || '商品名なし';
-                    const shortName = name.length > 14 ? (name.substring(0, 14) + '..') : name;
+                    const shortName = name.length > 30 ? (name.substring(0, 30) + '..') : name;
                     const price = parseInt(String(item['商品代金'] || "0").replace(/[^0-9]/g, "")) || 0;
                     const url = item['商品URL'] || '#';
 
@@ -728,15 +742,8 @@
                     `;
                 }).join('');
             } else {
-                document.getElementById('recent-sales-list').innerHTML = '<div style="color:#999; font-size:0.85rem; padding: 12px 0;">販売履歴データがありません</div>';
+                document.getElementById('recent-sales-list').innerHTML = '<div style="color:#999; font-size:0.8rem; padding: 10px 0;">販売履歴データがありません</div>';
             }
-
-            const top = [...rawListing].sort((a,b) => (parseInt(b['いいね！'])||0)-(parseInt(a['いいね！'])||0)).slice(0, 5);            
-            document.getElementById('likes-list').innerHTML = top.map(i => `                
-                <div class="top-product">                    
-                    <span><a href="${i['商品URL']||'#'}" target="_blank" class="prod-link">${(i['商品名']||'').substring(0,18)}..</a></span>                    
-                    <span>¥${(parseInt(i['商品代金'])||0).toLocaleString()} ❤️${i['いいね！']||0}</span>                
-                </div>            `).join('');        
         }
 
         function sortTableData(data, key, direction) {            
@@ -797,7 +804,7 @@
         function drawBar(id, labels, values, color) {            
             if(charts[id]) charts[id].destroy();            
             charts[id] = new Chart(document.getElementById(id), {                
-                type: 'bar', data: { labels, datasets: [{ data: values, backgroundColor: color, borderRadius: 6 }] },                
+                type: 'bar', data: { labels, datasets: [{ data: values, backgroundColor: color, borderRadius: 5 }] },                
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }            
             });        
         }
@@ -811,21 +818,14 @@
                     labels, 
                     datasets: [
                         { label: '利益', data: profits, backgroundColor: '#66BB6A', yAxisID: 'y', borderRadius: 4 }, 
-                        { label: '件数', data: counts, type: 'line', borderColor: '#FF7043', borderWidth: 2.5, pointRadius: 3, yAxisID: 'y1' }
+                        { label: '件数', data: counts, type: 'line', borderColor: '#FF7043', borderWidth: 2, pointRadius: 2.5, yAxisID: 'y1' }
                     ] 
                 },                
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false, 
                     scales: { 
-                        x: {
-                            ticks: {
-                                font: {
-                                    weight: 'bold',
-                                    size: 11
-                                }
-                            }
-                        },
+                        x: { ticks: { font: { weight: 'bold', size: 10 } } },
                         y: { position: 'left' }, 
                         y1: { position: 'right', grid: { display: false } } 
                     } 
@@ -837,7 +837,7 @@
             if(charts[id]) charts[id].destroy();            
             charts[id] = new Chart(document.getElementById(id), {                
                 type: 'doughnut', data: { labels, datasets: [{ data: values, backgroundColor: ['#2196F3', '#FF9800', '#66BB6A', '#F06292', '#FFEB3B', '#9C27B0'] }] },                
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, cutout: '55%' }            
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }, cutout: '55%' }            
             });        
         }
     </script>
