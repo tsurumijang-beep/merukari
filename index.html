@@ -95,7 +95,6 @@
         .active-page { display: flex; flex-direction: column; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* 4桁管理番号手動販売処理バー */
         .manual-input-box {
             background: #ffffff;
             border-radius: 16px;
@@ -153,12 +152,11 @@
             margin-left: auto;
         }
         
-        /* 28インチ画面最適化: 2段完全フィットグリッド */
         .dashboard-grid { 
             display: grid; 
             grid-template-columns: repeat(12, 1fr); 
-            grid-template-rows: 1fr 1.15fr; /* 상하 2단 분할 */
-            gap: 12px; 
+            grid-template-rows: 1fr 1fr;
+            gap: 10px; 
             flex: 1;
             height: calc(100% - 56px);
             min-height: 0;
@@ -171,8 +169,8 @@
 
         .card { 
             background: var(--card-bg); 
-            border-radius: 20px; 
-            padding: 12px 14px; 
+            border-radius: 18px; 
+            padding: 8px 12px; 
             box-shadow: var(--clay-shadow); 
             border: 3px solid white; 
             display: flex; 
@@ -182,9 +180,9 @@
             overflow: hidden;
         }
         .card h3 { 
-            margin: 0 0 6px 0; 
+            margin: 0 0 2px 0; 
             color: #555; 
-            font-size: 0.88rem; 
+            font-size: 0.84rem; 
             font-weight: 900; 
             flex-shrink: 0;
         }
@@ -195,44 +193,59 @@
             min-height: 0;
         }
 
-        /* 月別売上・費用コピー用エリア */
+        /* 그래프 높이 최대 확장 */
+        .sales-chart-container {
+            position: relative;
+            flex: 1;
+            width: 100%;
+            min-height: 0;
+        }
+
+        /* 여백 완전 제거 및 2배 크기 뱃지 최적화 */
         .monthly-summary-wrapper {
-            margin-top: 6px;
-            padding-top: 6px;
+            margin: 0;
+            padding: 0;
             border-top: 1px dashed #CFD8DC;
             user-select: text;
             flex-shrink: 0;
         }
         .monthly-summary-title {
-            font-size: 0.7rem;
-            color: #78909C;
-            font-weight: 700;
-            margin-bottom: 4px;
+            font-size: 0.85rem;
+            color: #546E7A;
+            font-weight: 800;
+            margin: 1px 0 2px 0;
+            line-height: 1.1;
         }
         .monthly-summary-container {
             display: flex;
             gap: 6px;
             overflow-x: auto;
-            padding-bottom: 2px;
+            padding: 0 0 1px 0;
+            margin: 0;
         }
         .monthly-data-badge {
             background: white;
             border-radius: 8px;
             padding: 4px 8px;
-            box-shadow: 2px 2px 4px rgba(0,0,0,0.04);
-            font-size: 0.72rem;
+            box-shadow: 1px 1px 4px rgba(0,0,0,0.05);
+            font-size: 1.2rem;
+            line-height: 1.2;
             white-space: nowrap;
             user-select: text;
+            flex-shrink: 0;
         }
         .badge-month {
             font-weight: 900;
-            color: #37474F;
-            margin-bottom: 2px;
-            border-bottom: 1px solid #ECEFF1;
-            padding-bottom: 1px;
+            color: #263238;
+            font-size: 1.25rem;
+            margin: 0 0 1px 0;
+            border-bottom: 2px solid #ECEFF1;
+            padding: 0 0 1px 0;
+            text-align: center;
         }
-        .badge-rev { color: #1565C0; font-weight: 700; }
-        .badge-cost { color: #C62828; font-weight: 700; }
+        .badge-rev { color: #1565C0; font-weight: 800; margin: 0; }
+        .badge-cost { color: #C62828; font-weight: 800; margin: 0; }
+        .badge-profit { color: #2E7D32; font-weight: 900; margin: 0; }
         
         .table-card { 
             background: white; 
@@ -254,11 +267,10 @@
         td { padding: 8px 10px; border-bottom: 1px solid #eee; }
         .prod-link { color: #2196F3; text-decoration: underline; font-weight: bold; cursor: pointer; }
         
-        .shipping-item { margin-bottom: 8px; font-size: 0.78rem; font-weight: 700; }
-        .progress-bg { background: #D1D9E6; height: 8px; border-radius: 50px; overflow: hidden; margin-top: 3px; }
+        .shipping-item { margin-bottom: 6px; font-size: 0.76rem; font-weight: 700; }
+        .progress-bg { background: #D1D9E6; height: 7px; border-radius: 50px; overflow: hidden; margin-top: 2px; }
         .progress-bar { height: 100%; background: var(--accent-blue); transition: width 0.8s; }
         
-        /* 最近の販売履歴 リスト (세로 스크롤 방지 가변 패딩) */
         #recent-sales-list {
             display: flex;
             flex-direction: column;
@@ -271,17 +283,17 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 4px 4px;
+            padding: 2px 4px;
             border-bottom: 1px solid #ECEFF1;
-            font-size: 0.78rem;
-            gap: 10px;
+            font-size: 0.76rem;
+            gap: 8px;
         }
         .recent-sales-item:last-child { border-bottom: none; }
         .recent-date {
             color: #78909C;
-            font-size: 0.75rem;
+            font-size: 0.74rem;
             font-weight: 700;
-            min-width: 78px;
+            min-width: 76px;
             white-space: nowrap;
         }
         .recent-link {
@@ -368,9 +380,9 @@
                 </div>                
                 <div class="card col-sales">                    
                     <h3>月別販売推移</h3>                    
-                    <div class="chart-container"><canvas id="salesChart"></canvas></div>
+                    <div class="sales-chart-container"><canvas id="salesChart"></canvas></div>
                     <div class="monthly-summary-wrapper">
-                        <div class="monthly-summary-title">📄 月別 売上・費用（ドラッグしてコピー可能）</div>
+                        <div class="monthly-summary-title">📄 月別 売上・費用・利益（ドラッグしてコピー可能）</div>
                         <div class="monthly-summary-container" id="salesSummaryList"></div>
                     </div>
                 </div>                
@@ -713,11 +725,11 @@
                     <div class="badge-month">${label}</div>
                     <div class="badge-rev">売上: ¥${(saleRevenues[label]||0).toLocaleString()}</div>
                     <div class="badge-cost">費用: ¥${(saleCosts[label]||0).toLocaleString()}</div>
+                    <div class="badge-profit">利益: ¥${(saleProfits[label]||0).toLocaleString()}</div>
                 </div>
             `).join('');
-            document.getElementById('salesSummaryList').innerHTML = summaryHtml || '<div style="color:#999; font-size:0.75rem;">データがありません</div>';
+            document.getElementById('salesSummaryList').innerHTML = summaryHtml || '<div style="color:#999; font-size:0.85rem;">データがありません</div>';
 
-            // 直近9件 販売履歴
             const recentSales = [...rawSales].sort((a, b) => {
                 const dateA = a['購入完了日'] || '';
                 const dateB = b['購入完了日'] || '';
@@ -823,11 +835,37 @@
                 },                
                 options: { 
                     responsive: true, 
-                    maintainAspectRatio: false, 
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: { top: 0, bottom: 0, left: 0, right: 0 }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            align: 'center',
+                            labels: {
+                                boxWidth: 10,
+                                boxHeight: 7,
+                                font: { size: 9, weight: 'bold' },
+                                padding: 2
+                            }
+                        }
+                    },
                     scales: { 
-                        x: { ticks: { font: { weight: 'bold', size: 10 } } },
-                        y: { position: 'left' }, 
-                        y1: { position: 'right', grid: { display: false } } 
+                        x: { 
+                            ticks: { font: { weight: 'bold', size: 9 }, padding: 0 },
+                            grid: { display: false }
+                        },
+                        y: { 
+                            position: 'left',
+                            ticks: { font: { size: 8 }, padding: 2 }
+                        }, 
+                        y1: { 
+                            position: 'right', 
+                            grid: { display: false },
+                            ticks: { font: { size: 8 }, padding: 2 }
+                        } 
                     } 
                 }
             });        
