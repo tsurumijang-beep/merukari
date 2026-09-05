@@ -150,14 +150,16 @@
         .col-inv { grid-column: span 5; }
         .col-type { grid-column: span 4; }
         .col-ship { grid-column: span 3; }
-        .col-sales { grid-column: span 8; }
-        .col-likes { grid-column: span 4; }
+        .col-sales { grid-column: span 7; }
+        .col-recent-sales { grid-column: span 5; }
+        .col-likes { grid-column: span 12; }
 
         @media (max-width: 1400px) {
             .col-inv { grid-column: span 6; }
             .col-type { grid-column: span 6; }
             .col-ship { grid-column: span 12; }
             .col-sales { grid-column: span 12; }
+            .col-recent-sales { grid-column: span 12; }
             .col-likes { grid-column: span 12; }
         }
 
@@ -237,6 +239,39 @@
         .shipping-item { margin-bottom: 10px; font-size: 0.82rem; font-weight: 700; }
         .progress-bg { background: #D1D9E6; height: 10px; border-radius: 50px; overflow: hidden; margin-top: 4px; }
         .progress-bar { height: 100%; background: var(--accent-blue); transition: width 1s; }
+        
+        /* 最近の販売履歴 アイテム */
+        .recent-sales-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 4px;
+            border-bottom: 1px solid #ECEFF1;
+            font-size: 0.82rem;
+            gap: 8px;
+        }
+        .recent-sales-item:last-child { border-bottom: none; }
+        .recent-date {
+            color: #78909C;
+            font-size: 0.78rem;
+            font-weight: 700;
+            min-width: 82px;
+            white-space: nowrap;
+        }
+        .recent-link {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .recent-price {
+            font-weight: 800;
+            color: #2E7D32;
+            min-width: 65px;
+            text-align: right;
+            white-space: nowrap;
+        }
+
         .top-product { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 0.82rem; font-weight: 700; }
         
         input[type="file"] { display: none; }
@@ -316,6 +351,11 @@
                         <div class="monthly-summary-container" id="salesSummaryList"></div>
                     </div>
                 </div>                
+                <!-- 最近の販売履歴 直近7件 カード -->
+                <div class="card col-recent-sales">                    
+                    <h3>最近の販売履歴 (直近7件)</h3>                    
+                    <div id="recent-sales-list" style="display: flex; flex-direction: column; overflow-y: auto; max-height: 310px;"></div>                
+                </div>            
                 <div class="card col-likes">                    
                     <h3>いいね！数上位</h3>                    
                     <div id="likes-list"></div>                
@@ -363,7 +403,6 @@
             removeSoldFromListing();
             updateAllUI();
 
-            // 手動入力のEnterキーイベント
             document.getElementById('manualStockCode').addEventListener('keyup', function(e) {
                 if (e.key === 'Enter') processManualSold();
             });
@@ -400,14 +439,12 @@
         document.getElementById('listingCsv').onchange = e => { if(e.target.files[0]) document.getElementById('listing-status').innerText = "✅ " + e.target.files[0].name; };        
         document.getElementById('salesCsv').onchange = e => { if(e.target.files[0]) document.getElementById('sales-status').innerText = "✅ " + e.target.files[0].name; };
 
-        // 4桁管理番号抽出用ヘルパー関数
         function extract4DigitCode(str) {
             if (!str) return null;
             const match = str.match(/\b(\d{4})\b/) || str.match(/[\s _-](\d{4})[\s _-]/) || str.match(/(\d{4})/);
             return match ? match[1] : null;
         }
 
-        // 販売履歴と一致する在庫を自動除外
         function removeSoldFromListing() {
             if (!rawSales.length || !rawListing.length) return 0;
             
@@ -441,7 +478,6 @@
             return removedCount;
         }
 
-        // 4桁管理番号の手動販売完了処理
         function processManualSold() {
             const inputEl = document.getElementById('manualStockCode');
             const code = (inputEl.value || '').trim();
@@ -589,15 +625,12 @@
             const curY = new Date().getFullYear();            
             const salesM = rawSales.filter(d => (d['購入完了日']||"").includes(`${curY}-${curM}`)).length;            
 
-            // ヘッダー件数
             document.getElementById('count-stock').innerText = stockCount.toLocaleString();            
             document.getElementById('count-sales-month').innerText = salesM.toLocaleString();
 
-            // ナビゲーション件数
             document.getElementById('menu-stock-count').innerText = `${stockCount}件`;
             document.getElementById('menu-sales-count').innerText = `${salesCount}件`;
 
-            // ページ上部バッジ件数
             document.getElementById('badge-stock-count').innerText = `全 ${stockCount.toLocaleString()} 件`;
             document.getElementById('badge-sales-count').innerText = `全 ${salesCount.toLocaleString()} 件`;
 
@@ -661,7 +694,6 @@
             const saleLabels = Object.keys(saleProfits).sort();            
             drawSalesChart('salesChart', saleLabels, saleLabels.map(l => saleProfits[l]), saleLabels.map(l => saleCounts[l]));
 
-            // 月別売上・費用テキストバー
             const summaryHtml = saleLabels.map(label => `
                 <div class="monthly-data-badge">
                     <div class="badge-month">${label}</div>
@@ -671,10 +703,38 @@
             `).join('');
             document.getElementById('salesSummaryList').innerHTML = summaryHtml || '<div style="color:#999; font-size:0.8rem;">データがありません</div>';
 
+            // 최근 판매 리스트 7건 렌더링 (直近7件)
+            const recentSales = [...rawSales].sort((a, b) => {
+                const dateA = a['購入完了日'] || '';
+                const dateB = b['購入完了日'] || '';
+                return dateB.localeCompare(dateA);
+            }).slice(0, 7);
+
+            if (recentSales.length > 0) {
+                document.getElementById('recent-sales-list').innerHTML = recentSales.map(item => {
+                    const fullDate = item['購入完了日'] || '-';
+                    const shortDate = fullDate.length >= 10 ? fullDate.substring(0, 10) : fullDate;
+                    const name = item['商品名'] || '商品名なし';
+                    const shortName = name.length > 14 ? (name.substring(0, 14) + '..') : name;
+                    const price = parseInt(String(item['商品代金'] || "0").replace(/[^0-9]/g, "")) || 0;
+                    const url = item['商品URL'] || '#';
+
+                    return `
+                        <div class="recent-sales-item">
+                            <span class="recent-date">${shortDate}</span>
+                            <span class="recent-link"><a href="${url}" target="_blank" class="prod-link" title="${name}">${shortName}</a></span>
+                            <span class="recent-price">¥${price.toLocaleString()}</span>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                document.getElementById('recent-sales-list').innerHTML = '<div style="color:#999; font-size:0.85rem; padding: 12px 0;">販売履歴データがありません</div>';
+            }
+
             const top = [...rawListing].sort((a,b) => (parseInt(b['いいね！'])||0)-(parseInt(a['いいね！'])||0)).slice(0, 5);            
             document.getElementById('likes-list').innerHTML = top.map(i => `                
                 <div class="top-product">                    
-                    <span><a href="${i['商品URL']||'#'}" target="_blank" class="prod-link">${(i['商品名']||'').substring(0,12)}..</a></span>                    
+                    <span><a href="${i['商品URL']||'#'}" target="_blank" class="prod-link">${(i['商品名']||'').substring(0,18)}..</a></span>                    
                     <span>¥${(parseInt(i['商品代金'])||0).toLocaleString()} ❤️${i['いいね！']||0}</span>                
                 </div>            `).join('');        
         }
@@ -725,7 +785,6 @@
                 elapsed: Math.ceil(Math.abs(today - new Date(d['出品日時']))/(1000*60*60*24))
             }));            
 
-            // 再出品予定件数の更新
             document.getElementById('menu-resale-count').innerText = `${dataR.length}件`;
             document.getElementById('badge-resale-count').innerText = `全 ${dataR.length.toLocaleString()} 件`;
 
