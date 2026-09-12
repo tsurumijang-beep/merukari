@@ -490,7 +490,6 @@
             border: 1px solid rgba(255,255,255,0.8);
         }
 
-        /* 전在庫一覧 상단 전체/선택 종류 통계 바 스타일 (일본어 적용) */
         .stock-stats-bar {
             display: flex;
             align-items: center;
@@ -520,7 +519,6 @@
             font-size: 0.85rem;
         }
 
-        /* 멀티셀렉트 드롭다운 스타일 */
         .multiselect-dropdown {
             position: relative;
             display: inline-block;
@@ -584,7 +582,6 @@
         }
         .multiselect-content label:hover { background: #F1F5F9; }
 
-        /* 판매품 목록 상단 통계 바 스타일 */
         .sales-stats-bar {
             display: flex;
             align-items: center;
@@ -866,7 +863,6 @@
                         <h3>全在庫一覧</h3>
                         <span class="table-count-badge" id="badge-stock-count">全 0 件</span>
                     </div>
-                    <!-- 통계 바 항목을 일본어로 변경 -->
                     <div class="stock-stats-bar" id="stockStatsBar">
                         <div class="stock-stat-group">全種類: <span class="stock-stat-val" style="color:#0369A1;" id="stat-all-types">-</span></div>
                         <span>|</span>
@@ -1647,12 +1643,11 @@
 
                 const currentSelectionText = selectedCategories.length === 0 ? '選択なし (全体表示)' : (selectedCategories.length === availableCategories.length ? 'すべての種類 (全体)' : `${selectedCategories.length}件選択中`);
 
-                // 상단 통계 바 업데이트 (일본어 적용)
                 const setTxt = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
                 setTxt('stat-all-types', `${availableCategories.length}件`);
-                setTxt('stat-all-stock-cnt', `${rawListing.length}件`);
+                setTxt('stat-all-stock-cnt', `${rawListing.length}건`);
                 setTxt('stat-sel-types', `${selectedCategories.length}件`);
-                setTxt('stat-sel-stock-cnt', `${filteredListing.length}件`);
+                setTxt('stat-sel-stock-cnt', `${filteredListing.length}건`);
 
                 let hA = `<table><thead><tr>
                     <th class="${getCls('allStock','出品日時')}" onclick="triggerSort('allStock','出品日時')">出品日時</th>
@@ -1916,7 +1911,22 @@
                             labels: { boxWidth: 10, font: { size: 10, weight: 'bold' } } 
                         } 
                     }, 
-                    cutout: '52%' 
+                    cutout: '52%',
+                    // 종류별 구성 차트 각 항목 클릭 시 전재고일람으로 이동 및 해당 종류만 필터링
+                    onClick: (event, elements, chart) => {
+                        if (elements.length > 0) {
+                            const clickedIndex = elements[0].index;
+                            const clickedCategory = chart.data.labels[clickedIndex];
+                            
+                            // 전재고일람 페이지로 이동
+                            showPage('allStockPage');
+
+                            // 해당 종류만 선택 상태로 설정
+                            selectedCategories = [clickedCategory];
+                            isFirstLoadStock = false;
+                            rebuildTables();
+                        }
+                    }
                 },
                 plugins: [pieDataLabelsPlugin]
             });        
