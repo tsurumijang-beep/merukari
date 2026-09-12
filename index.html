@@ -458,6 +458,7 @@
             overflow: auto;
             flex: 1;
             height: 100%;
+            position: relative;
         }
         .table-header-flex {
             display: flex;
@@ -488,6 +489,100 @@
             box-shadow: var(--clay-tile);
             border: 1px solid rgba(255,255,255,0.8);
         }
+
+        /* 전在庫一覧 상단 전체/선택 종류 통계 바 스타일 (일본어 적용) */
+        .stock-stats-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #FFFFFF 0%, #F0F6FB 100%);
+            padding: 6px 14px;
+            border-radius: 18px;
+            box-shadow: var(--clay-tile);
+            border: 1.5px solid rgba(255, 255, 255, 0.9);
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: #334E68;
+            margin-left: auto;
+            margin-right: 10px;
+            flex-wrap: wrap;
+            max-width: 580px;
+            overflow-x: auto;
+        }
+        .stock-stat-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+        .stock-stat-val {
+            font-weight: 900;
+            font-size: 0.85rem;
+        }
+
+        /* 멀티셀렉트 드롭다운 스타일 */
+        .multiselect-dropdown {
+            position: relative;
+            display: inline-block;
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: #0369A1;
+            z-index: 100;
+        }
+        .multiselect-btn {
+            background: linear-gradient(180deg, #E0F2FE 0%, #BAE6FD 100%);
+            border: 1px solid #7DD3FC;
+            padding: 4px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: var(--clay-tile);
+            text-shadow: 0 1px 1px rgba(255,255,255,0.8);
+        }
+        .multiselect-btn:hover { filter: brightness(0.97); }
+        .multiselect-content {
+            display: none;
+            position: absolute;
+            background: #FFFFFF;
+            min-width: 180px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+            border-radius: 12px;
+            padding: 8px;
+            z-index: 9999 !important;
+            border: 1.5px solid #BAE6FD;
+            max-height: 220px;
+            overflow-y: auto;
+            margin-top: 4px;
+            left: 0;
+        }
+        .multiselect-content.show { display: block; }
+        .multiselect-actions {
+            display: flex;
+            justify-content: space-between;
+            padding-bottom: 6px;
+            margin-bottom: 6px;
+            border-bottom: 1px solid #E2E8F0;
+            font-size: 0.75rem;
+        }
+        .multiselect-actions span {
+            cursor: pointer;
+            color: #2563EB;
+            font-weight: bold;
+        }
+        .multiselect-actions span:hover { text-decoration: underline; }
+        .multiselect-content label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 6px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 700;
+            color: #334155;
+        }
+        .multiselect-content label:hover { background: #F1F5F9; }
 
         /* 판매품 목록 상단 통계 바 스타일 */
         .sales-stats-bar {
@@ -534,7 +629,7 @@
         .excel-down-btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
         .excel-down-btn:active { transform: translateY(3px); box-shadow: var(--btn-3d-pressed); }
 
-        table { width: 100%; border-collapse: separate; border-spacing: 0 4px; font-size: 0.80rem; margin-top: 6px; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0 4px; font-size: 0.80rem; margin-top: 6px; position: relative; }
         th { 
             background: linear-gradient(180deg, #E0F2FE 0%, #BAE6FD 100%); 
             padding: 9px 10px; 
@@ -546,6 +641,7 @@
             font-weight: 900;
             color: #0369A1;
             white-space: nowrap;
+            z-index: 10;
         }
         th:first-child { border-radius: 12px 0 0 12px; }
         th:last-child { border-radius: 0 12px 12px 0; }
@@ -558,6 +654,8 @@
             border-top: 1px solid rgba(255,255,255,0.9);
             border-bottom: 1px solid #E2E8F0;
             white-space: nowrap;
+            position: relative;
+            z-index: 1;
         }
         tr td:first-child { border-radius: 10px 0 0 10px; }
         tr td:last-child { border-radius: 0 10px 10px 0; }
@@ -586,6 +684,8 @@
             color: #0369A1;
             outline: none;
             box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
+            z-index: 20;
+            position: relative;
         }
         
         .shipping-item { margin-bottom: 6px; font-size: 0.82rem; font-weight: 800; color: #334E68; }
@@ -766,7 +866,17 @@
                         <h3>全在庫一覧</h3>
                         <span class="table-count-badge" id="badge-stock-count">全 0 件</span>
                     </div>
-                    <button class="excel-down-btn" onclick="exportToExcel('allStock')">📊 엑셀 다운로드 (.xlsx)</button>
+                    <!-- 통계 바 항목을 일본어로 변경 -->
+                    <div class="stock-stats-bar" id="stockStatsBar">
+                        <div class="stock-stat-group">全種類: <span class="stock-stat-val" style="color:#0369A1;" id="stat-all-types">-</span></div>
+                        <span>|</span>
+                        <div class="stock-stat-group">全在庫: <span class="stock-stat-val" style="color:#1E40AF;" id="stat-all-stock-cnt">0</span></div>
+                        <span>|</span>
+                        <div class="stock-stat-group">選択種類: <span class="stock-stat-val" style="color:#D97706;" id="stat-sel-types">-</span></div>
+                        <span>|</span>
+                        <div class="stock-stat-group">表示中: <span class="stock-stat-val" style="color:#16A34A;" id="stat-sel-stock-cnt">0</span></div>
+                    </div>
+                    <button class="excel-down-btn" onclick="exportToExcel('allStock')">📊 Excel ダウン로드 (.xlsx)</button>
                 </div>
                 <div id="allStockTable"></div>
             </div>
@@ -778,7 +888,6 @@
                         <h3>販売品一覧</h3>
                         <span class="table-count-badge" id="badge-sales-count">全 0 件</span>
                     </div>
-                    <!-- 전체 통계 바 추가 -->
                     <div class="sales-stats-bar" id="salesTotalStatsBar">
                         <div class="sales-stat-item">総売上: <span class="sales-stat-val" style="color:#1D4ED8;" id="stat-total-rev">¥0</span></div>
                         <span>|</span>
@@ -790,7 +899,7 @@
                         <span>|</span>
                         <div class="sales-stat-item">平均純利益率: <span class="sales-stat-val" style="color:#2563EB;" id="stat-avg-margin">0.0%</span></div>
                     </div>
-                    <button class="excel-down-btn" onclick="exportToExcel('salesList')">📊 엑셀 다운로드 (.xlsx)</button>
+                    <button class="excel-down-btn" onclick="exportToExcel('salesList')">📊 Excel ダウン로드 (.xlsx)</button>
                 </div>
                 <div id="salesListTable"></div>
             </div>
@@ -802,7 +911,7 @@
                         <h3>再出品予定リスト</h3>
                         <span class="table-count-badge" id="badge-resale-count">全 0 件</span>
                     </div>
-                    <button class="excel-down-btn" onclick="exportToExcel('resale')">📊 엑셀 다운로드 (.xlsx)</button>
+                    <button class="excel-down-btn" onclick="exportToExcel('resale')">📊 Excel ダウン로드 (.xlsx)</button>
                 </div>
                 <div id="resaleTable"></div>
             </div>
@@ -810,8 +919,26 @@
     </main>
 
     <script>        
-        let rawListing = JSON.parse(localStorage.getItem('mercari_last_listing')) || [];        
-        let rawSales = JSON.parse(localStorage.getItem('mercari_last_sales')) || [];        
+        let rawListing = JSON.parse(localStorage.getItem('mercari_last_listing'));
+        let rawSales = JSON.parse(localStorage.getItem('mercari_last_sales'));
+
+        if (!rawListing || rawListing.length === 0) {
+            rawListing = [
+                { '出品日時': '2026-08-01 10:00:00', '管理番号': '1201', '商品名': '핑크 Uネック ボディスーツ', '商品代金': '2980', 'いいね！': '5', '商品URL': '#' },
+                { '出品日時': '2026-06-15 12:00:00', '管理番号': '1105', '商品名': '심플 원피스 드레스 파스텔', '商品代金': '4500', 'いいね！': '12', '商品URL': '#' },
+                { '出品日時': '2026-07-20 14:30:00', '管理番号': '1180', '商品名': '하이힐 스틸레토 펜슬', '商品代金': '3800', 'いいね！': '3', '商品URL': '#' }
+            ];
+            localStorage.setItem('mercari_last_listing', JSON.stringify(rawListing));
+        }
+
+        if (!rawSales || rawSales.length === 0) {
+            rawSales = [
+                { '購入完了日': '2026-09-02 15:20:00', '管理番号': '1190', '商品名': '여성 오프숄더 블라우스', '商品代金': '3200', '販売利益': '2880', '配送の方法': 'ゆうゆうメルカリ便', '仕入れ単価': 1000, '商品URL': '#' },
+                { '購入完了日': '2026-09-10 11:10:00', '管理番号': '1195', '商品名': '슬림핏 스커트 미디엄', '商品代金': '2500', '販売利益': '2250', '配送の方法': 'らくらくメルカリ便', '仕入れ単価': 800, '商品URL': '#' }
+            ];
+            localStorage.setItem('mercari_last_sales', JSON.stringify(rawSales));
+        }
+
         let charts = {};        
         let sortState = { 
             allStock: { key: '出品日時', dir: 'desc' }, 
@@ -820,6 +947,8 @@
         };
 
         let masterMap = JSON.parse(localStorage.getItem('mercari_master_map')) || {};
+        let selectedCategories = []; 
+        let isFirstLoadStock = true; 
 
         window.onload = () => {            
             updateTime();            
@@ -833,6 +962,13 @@
                     if (e.key === 'Enter') processManualSold();
                 });
             }
+
+            window.addEventListener('click', function(e) {
+                if (!e.target.closest('.multiselect-dropdown')) {
+                    const content = document.getElementById('multiselectContent');
+                    if (content) content.classList.remove('show');
+                }
+            });
         };        
         setInterval(updateTime, 1000);
 
@@ -889,7 +1025,7 @@
                 parseCostExcel(file, () => {
                     applyMasterData();
                     updateAllUI();
-                    alert(`✅ 仕入れ単価 엑셀 [ ${file.name} ] 이(가) 성공적으로 반영되었습니다.`);
+                    alert(`✅ 仕入れ単価 Excel [ ${file.name} ] が正常に反映されました。`);
                 });
             };
         }
@@ -971,10 +1107,10 @@
             let targetItem = targetList.find(it => (it['商品ID'] && it['商品ID'] === rowKey) || (it['商品名'] === rowKey));
             if (!targetItem) return;
 
-            let currentVal = targetItem[fieldName] || '';
+            let currentVal = fieldName === '種類' ? getCategory(targetItem) : (targetItem[fieldName] || '');
             if (currentVal === '-' || (fieldName === '仕入れ単価' && currentVal === 0)) currentVal = '';
 
-            tdEl.innerHTML = `<input type="text" class="inline-cell-input" value="${currentVal}" placeholder="입력">`;
+            tdEl.innerHTML = `<input type="text" class="inline-cell-input" value="${currentVal}" placeholder="入力">`;
             const input = tdEl.querySelector('input');
             input.focus();
             input.select();
@@ -1006,6 +1142,8 @@
                         masterMap[code].cost = numVal;
                         localStorage.setItem('mercari_master_map', JSON.stringify(masterMap));
                     }
+                } else if (fieldName === '種類') {
+                    targetItem['手動種類'] = val || '';
                 } else {
                     targetItem[fieldName] = val || '-';
                     const code = targetItem['管理番号'];
@@ -1251,7 +1389,6 @@
                 });
                 const curMonthCost = Math.max(0, curMonthRev - curMonthProfit);
 
-                // 판매품 목록 전체 통계 계산 (총 매출, 총 매입비, 총 수수료, 총 순이익, 평균 순이익률)
                 let totalRev = 0;
                 let totalCost = 0;
                 let totalFee = 0;
@@ -1286,10 +1423,9 @@
                 setTxt('menu-stock-count', `${stockCount}件`);
                 setTxt('menu-sales-count', `${salesCount}件`);
 
-                setTxt('badge-stock-count', `全 ${salesCount.toLocaleString()} 件`);
+                setTxt('badge-stock-count', `全 ${stockCount.toLocaleString()} 件`);
                 setTxt('badge-sales-count', `全 ${salesCount.toLocaleString()} 件`);
 
-                // 판매품 목록 상단 통계 값 바인딩
                 setTxt('stat-total-rev', `¥${totalRev.toLocaleString()}`);
                 setTxt('stat-total-cost', `¥${totalCost.toLocaleString()}`);
                 setTxt('stat-total-fee', `¥${totalFee.toLocaleString()}`);
@@ -1316,6 +1452,13 @@
             return 'その他';        
         }
 
+        function getCategory(item) {
+            if (item['手動種類'] && item['手動種類'].trim() !== '') {
+                return item['手動種類'].trim();
+            }
+            return categorize(item['商品名']);
+        }
+
         function renderCharts() {            
             try {
                 const invMap = {};            
@@ -1331,7 +1474,7 @@
                 drawBar('inventoryChart', invLabels, invLabels.map(l => invMap[l]), '#2986FE');
 
                 const types = {};            
-                rawListing.forEach(d => { const cat = categorize(d['商品名']); types[cat] = (types[cat] || 0) + 1; });            
+                rawListing.forEach(d => { const cat = getCategory(d); types[cat] = (types[cat] || 0) + 1; });            
                 drawPie('typeChart', Object.keys(types), Object.values(types));
 
                 const ships = {};            
@@ -1438,26 +1581,106 @@
             return sortState[tableId].dir === 'asc' ? "sort-asc" : "sort-desc";        
         }
 
+        // --- 종류 복수 선택 드롭다운 관련 함수 ---
+        function toggleMultiselectDropdown() {
+            const content = document.getElementById('multiselectContent');
+            if (content) content.classList.toggle('show');
+        }
+
+        function updateCategorySelection() {
+            const checkboxes = document.querySelectorAll('.cat-checkbox');
+            selectedCategories = Array.from(checkboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.value);
+
+            const btnText = document.getElementById('multiselectBtnText');
+            if (btnText) {
+                if (selectedCategories.length === 0) {
+                    btnText.innerText = '選択なし (全体表示)';
+                } else if (selectedCategories.length === checkboxes.length) {
+                    btnText.innerText = 'すべての種類 (全体)';
+                } else {
+                    btnText.innerText = `${selectedCategories.length}件選択中`;
+                }
+            }
+            rebuildTables();
+        }
+
+        function selectAllCategories(select) {
+            const checkboxes = document.querySelectorAll('.cat-checkbox');
+            checkboxes.forEach(cb => cb.checked = select);
+            updateCategorySelection();
+        }
+
         function rebuildTables() {            
             try {
-                // 1. 全在庫一覧 テーブル
-                let dataA = sortTableData(rawListing, sortState.allStock.key, sortState.allStock.dir);            
+                // 고유 종류 목록 추출
+                const allCategoriesSet = new Set();
+                rawListing.forEach(d => allCategoriesSet.add(getCategory(d)));
+                const availableCategories = Array.from(allCategoriesSet).sort();
+
+                // 최초 실행 시 전체 선택이 기본값
+                if (isFirstLoadStock && availableCategories.length > 0) {
+                    selectedCategories = [...availableCategories];
+                    isFirstLoadStock = false;
+                }
+
+                // 1. 全在庫一覧 テーブル (선택된 종류가 없으면 전체 데이터 표시, 있으면 필터링)
+                let filteredListing = rawListing;
+                if (selectedCategories.length > 0) {
+                    filteredListing = rawListing.filter(d => selectedCategories.includes(getCategory(d)));
+                }
+                let dataA = sortTableData(filteredListing, sortState.allStock.key, sortState.allStock.dir);            
+                
+                let catCheckboxesHtml = `
+                    <div class="multiselect-actions">
+                        <span onclick="selectAllCategories(true)">全選択</span>
+                        <span onclick="selectAllCategories(false)">全解除</span>
+                    </div>
+                `;
+                availableCategories.forEach(cat => {
+                    const isChecked = selectedCategories.includes(cat) ? 'checked' : '';
+                    catCheckboxesHtml += `
+                        <label><input type="checkbox" class="cat-checkbox" value="${cat}" ${isChecked} onchange="updateCategorySelection()"> ${cat}</label>
+                    `;
+                });
+
+                const currentSelectionText = selectedCategories.length === 0 ? '選択なし (全体表示)' : (selectedCategories.length === availableCategories.length ? 'すべての種類 (全体)' : `${selectedCategories.length}件選択中`);
+
+                // 상단 통계 바 업데이트 (일본어 적용)
+                const setTxt = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
+                setTxt('stat-all-types', `${availableCategories.length}件`);
+                setTxt('stat-all-stock-cnt', `${rawListing.length}件`);
+                setTxt('stat-sel-types', `${selectedCategories.length}件`);
+                setTxt('stat-sel-stock-cnt', `${filteredListing.length}件`);
+
                 let hA = `<table><thead><tr>
                     <th class="${getCls('allStock','出品日時')}" onclick="triggerSort('allStock','出品日時')">出品日時</th>
                     <th>管理番号</th>
                     <th class="${getCls('allStock','注文NO')}" onclick="triggerSort('allStock','注文NO')">注文NO</th>
                     <th class="${getCls('allStock','SKU')}" onclick="triggerSort('allStock','SKU')">SKU</th>
-                    <th>種類</th>
+                    <th>
+                        <div class="multiselect-dropdown">
+                            <div class="multiselect-btn" onclick="toggleMultiselectDropdown()">
+                                <span>種類: <b id="multiselectBtnText">${currentSelectionText}</b></span> ▼
+                            </div>
+                            <div class="multiselect-content" id="multiselectContent">
+                                ${catCheckboxesHtml}
+                            </div>
+                        </div>
+                    </th>
                     <th onclick="triggerSort('allStock','商品名')">商品名</th>
                     <th class="${getCls('allStock','仕入れ単価')}" onclick="triggerSort('allStock','仕入れ単価')">仕入れ単価</th>
                     <th class="${getCls('allStock','商品代金')}" onclick="triggerSort('allStock','商品代金')">価格</th>
                     <th class="${getCls('allStock','いいね！')}" onclick="triggerSort('allStock','いいね！')">いいね</th>
                 </tr></thead><tbody>`;            
+                
                 dataA.forEach(d => {
                     const cost = parseInt(d['仕入れ単価']) || 0;
                     const code = d['管理番号'] || '-';
                     const orderNo = d['注文NO'] || '-';
                     const sku = d['SKU'] || '-';
+                    const category = getCategory(d);
                     const rowKey = encodeURIComponent(d['商品ID'] || d['商品名']);
 
                     hA += `<tr>
@@ -1471,7 +1694,9 @@
                         <td class="editable-cell" ondblclick="enableEditField(this, 'listing', '${rowKey}', 'SKU')" title="✏️ ダブルクリックで編集" style="font-family:monospace; font-weight:bold; color:${sku === '-' ? '#94A3B8' : '#1E293B'};">
                             ${sku}
                         </td>
-                        <td>${categorize(d['商品名'])}</td>
+                        <td class="editable-cell" ondblclick="enableEditField(this, 'listing', '${rowKey}', '種類')" title="✏️ ダブルクリックで編集" style="font-weight:bold; color:#0284C7;">
+                            ${category}
+                        </td>
                         <td><a href="${d['商品URL']||'#'}" target="_blank" class="prod-link">${d['商品名']}</a></td>
                         <td class="editable-cell" ondblclick="enableEditField(this, 'listing', '${rowKey}', '仕入れ単価')" title="✏️ ダブルクリックで編集" style="color:#DC2626; font-weight:800;">
                             ${cost ? '¥'+cost.toLocaleString() : '-'}
@@ -1482,6 +1707,9 @@
                 });            
                 const tblA = document.getElementById('allStockTable');
                 if (tblA) tblA.innerHTML = hA + `</tbody></table>`;
+
+                const badgeStock = document.getElementById('badge-stock-count');
+                if (badgeStock) badgeStock.innerText = `表示 ${dataA.length.toLocaleString()} / 全 ${rawListing.length.toLocaleString()} 件`;
 
                 // 2. 販売品一覧 テーブル
                 let dataS = sortTableData(rawSales, sortState.salesList.key, sortState.salesList.dir);            
@@ -1706,7 +1934,7 @@
                     'メルカリ管理番号': item['管理番号'] || '',
                     '注文NO': item['注文NO'] || '',
                     'SKU': item['SKU'] || '',
-                    '種類': categorize(item['商品名']),
+                    '種類': getCategory(item),
                     '商品名': item['商品名'] || '',
                     '仕入れ単価': parseInt(item['仕入れ単価']) || 0,
                     '価格': parseInt(String(item['商品代金'] || '0').replace(/[^0-9]/g, '')) || 0,
