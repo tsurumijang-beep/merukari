@@ -685,7 +685,14 @@
             position: relative;
         }
         
-        .shipping-item { margin-bottom: 6px; font-size: 0.82rem; font-weight: 800; color: #334E68; }
+        .shipping-item { 
+            margin-bottom: 6px; 
+            font-size: 0.82rem; 
+            font-weight: 800; 
+            color: #334E68; 
+            padding: 2px 4px;
+            border-radius: 6px;
+        }
         .progress-bg { 
             background: #D8E6F3; 
             height: 10px; 
@@ -995,7 +1002,7 @@
                         <span>|</span>
                         <div class="stock-stat-group">表示中: <span class="stock-stat-val" style="color:#16A34A;" id="stat-sel-stock-cnt">0</span></div>
                     </div>
-                    <button class="excel-down-btn" onclick="exportToExcel('allStock')">📊 Excel ダウンロード (.xlsx)</button>
+                    <button class="excel-down-btn" onclick="exportToExcel('allStock')">📊 Excel ダウン로드 (.xlsx)</button>
                 </div>
                 <!-- 一括種類入力コントロールバー -->
                 <div class="batch-action-bar">
@@ -1028,7 +1035,7 @@
                         <span>|</span>
                         <div class="sales-stat-item">平均純利益率: <span class="sales-stat-val" style="color:#2563EB;" id="stat-avg-margin">0.0%</span></div>
                     </div>
-                    <button class="excel-down-btn" onclick="exportToExcel('salesList')">📊 Excel ダウンロード (.xlsx)</button>
+                    <button class="excel-down-btn" onclick="exportToExcel('salesList')">📊 Excel ダウン로드 (.xlsx)</button>
                 </div>
                 <div id="salesListTable"></div>
             </div>
@@ -1053,9 +1060,9 @@
 
         if (!rawListing || rawListing.length === 0) {
             rawListing = [
-                { '出品日時': '2026-08-01 10:00:00', '管理番号': 'H023', '商品名': '新品未使用 27cm ハイヒール H023 大きいサイズ', '商品代金': '2980', 'いいね！': '5', '商品URL': '#' },
-                { '出品日時': '2026-06-15 12:00:00', '管理番号': '1105', '商品名': 'シンプルワンピースドレス パステル', '商品代金': '4500', 'いいね！': '12', '商品URL': '#' },
-                { '出品日時': '2026-07-20 14:30:00', '管理番号': '1180', '商品名': 'ハイヒール スティレット ペンシル', '商品代金': '3800', 'いいね！': '3', '商品URL': '#' }
+                { '出品日時': '2026-08-01 10:00:00', '管理番号': 'H023', '商品名': '新品未使用 Lサイズ ボディコンワンピ 1430 大きいサイズ', '商品代金': '2980', 'いいね！': '5', '配送の方法': 'ゆうゆうメルカリ便', '商品URL': '#' },
+                { '出品日時': '2026-06-15 12:00:00', '管理番号': '1105', '商品名': 'シンプルワンピースドレス パステル', '商品代金': '4500', 'いいね！': '12', '配送の方法': 'らくらくメルカリ便', '商品URL': '#' },
+                { '出品日時': '2026-07-20 14:30:00', '管理番号': '1180', '商品名': 'ハイヒール スティレット ペンシル', '商品代金': '3800', 'いいね！': '3', '配送の方法': 'ゆうゆうメルカリ便', '商品URL': '#' }
             ];
             localStorage.setItem('mercari_last_listing', JSON.stringify(rawListing));
         }
@@ -1177,6 +1184,7 @@
                         const orderNo = String(r['注文NO'] || r['注文番号'] || '').trim();
                         const sku = String(r['SKU'] || '').trim();
                         const category = String(r['種類'] || r['カテゴリ'] || '').trim();
+                        const shipping = String(r['配送の方法'] || r['配送方法'] || '').trim();
 
                         if (rawCode !== undefined && rawCode !== null && String(rawCode).trim() !== '') {
                             const code = String(rawCode).trim();
@@ -1184,7 +1192,8 @@
                                 orderNo: orderNo || (masterMap[code] ? masterMap[code].orderNo : '-'),
                                 sku: sku || (masterMap[code] ? masterMap[code].sku : '-'),
                                 cost: cost,
-                                category: category || (masterMap[code] ? masterMap[code].category : '')
+                                category: category || (masterMap[code] ? masterMap[code].category : ''),
+                                shipping: shipping || (masterMap[code] ? masterMap[code].shipping : '')
                             };
                             count++;
                         }
@@ -1193,6 +1202,7 @@
                             if (!masterMap[productName]) masterMap[productName] = {};
                             masterMap[productName].cost = cost;
                             if (category) masterMap[productName].category = category;
+                            if (shipping) masterMap[productName].shipping = shipping;
                         }
                     });
 
@@ -1218,6 +1228,22 @@
                 return matchNum[1].trim();
             }
             return null;
+        }
+
+        function extractCategoryFromTitle(title) {
+            if (!title) return '-';
+            const sizeRegex = /(?:[SMLXLサイズ]+|\d+(?:\.\d+)?(?:cm|センチ|号|サイズ|FREE|free))/i;
+            const match = title.match(sizeRegex);
+            if (!match) return '-';
+
+            const sizeIdx = title.indexOf(match[0]);
+            if (sizeIdx === -1) return '-';
+
+            const afterSize = title.substring(sizeIdx + match[0].length).trim();
+            if (!afterSize) return '-';
+
+            const tokens = afterSize.split(/[\s ]+/);
+            return tokens[0] && tokens[0].trim() !== '' ? tokens[0].trim() : '-';
         }
 
         function applyMasterData() {
@@ -1251,10 +1277,27 @@
                         if (storedCat && (!item['手動種類'] || item['手動種類'] === '-')) {
                             item['手動種類'] = storedCat;
                         }
+
+                        const storedShip = matchedMaster.shipping || (masterMap[pName] ? masterMap[pName].shipping : '');
+                        if (storedShip && (!item['配送の方法'] || item['配送の方法'] === '-')) {
+                            item['配送の方法'] = storedShip;
+                        }
                     } else {
                         item['注文NO'] = item['注文NO'] || '-';
                         item['SKU'] = item['SKU'] || '-';
                         item['仕入れ単価'] = item['仕入れ単価'] || 0;
+                        item['配送の方法'] = item['配送の方法'] || '未定';
+                    }
+
+                    if (!item['手動種類'] || item['手動種類'] === '-' || item['手動種類'].trim() === '') {
+                        const autoCat = extractCategoryFromTitle(pName);
+                        if (autoCat !== '-') {
+                            item['手動種類'] = autoCat;
+                            if (pName) {
+                                if (!masterMap[pName]) masterMap[pName] = {};
+                                masterMap[pName].category = autoCat;
+                            }
+                        }
                     }
                 });
             });
@@ -1320,6 +1363,17 @@
                     if (pName) {
                         if (!masterMap[pName]) masterMap[pName] = {};
                         masterMap[pName].category = val || '';
+                    }
+                    localStorage.setItem('mercari_master_map', JSON.stringify(masterMap));
+                } else if (fieldName === '配送の方法') {
+                    targetItem['配送の方法'] = val || '未定';
+                    if (code && code !== '-') {
+                        if (!masterMap[code]) masterMap[code] = {};
+                        masterMap[code].shipping = val || '未定';
+                    }
+                    if (pName) {
+                        if (!masterMap[pName]) masterMap[pName] = {};
+                        masterMap[pName].shipping = val || '未定';
                     }
                     localStorage.setItem('mercari_master_map', JSON.stringify(masterMap));
                 } else {
@@ -1722,7 +1776,8 @@
             if (pName && masterMap[pName] && masterMap[pName].category) {
                 return masterMap[pName].category;
             }
-            return '-';
+            const autoCat = extractCategoryFromTitle(pName);
+            return autoCat;
         }
 
         function renderCharts() {            
@@ -1879,6 +1934,8 @@
 
         function rebuildTables() {            
             try {
+                let filteredListing = rawListing;
+
                 const allCategoriesSet = new Set();
                 rawListing.forEach(d => allCategoriesSet.add(getCategory(d)));
                 const availableCategories = Array.from(allCategoriesSet).sort();
@@ -1888,7 +1945,6 @@
                     isFirstLoadStock = false;
                 }
 
-                let filteredListing = rawListing;
                 if (selectedCategories.length > 0) {
                     filteredListing = rawListing.filter(d => selectedCategories.includes(getCategory(d)));
                 }
@@ -1911,10 +1967,11 @@
 
                 const setTxt = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
                 setTxt('stat-all-types', `${availableCategories.length}件`);
-                setTxt('stat-all-stock-cnt', `${rawListing.length}건`);
+                setTxt('stat-all-stock-cnt', `${rawListing.length}件`);
                 setTxt('stat-sel-types', `${selectedCategories.length}件`);
-                setTxt('stat-sel-stock-cnt', `${filteredListing.length}건`);
+                setTxt('stat-sel-stock-cnt', `${filteredListing.length}件`);
 
+                // 💡 전재고 일람 테이블에 配送の方法(배송 방법) 컬럼 추가 및 정렬 적용
                 let hA = `<table><thead><tr>
                     <th style="width: 35px; text-align: center;">選択</th>
                     <th class="${getCls('allStock','出品日時')}" onclick="triggerSort('allStock','出品日時')">出品日時</th>
@@ -1932,6 +1989,7 @@
                         </div>
                     </th>
                     <th onclick="triggerSort('allStock','商品名')">商品名</th>
+                    <th class="${getCls('allStock','配送の方法')}" onclick="triggerSort('allStock','配送の方法')">配送方法</th>
                     <th class="${getCls('allStock','仕入れ単価')}" onclick="triggerSort('allStock','仕入れ単価')">仕入れ単価</th>
                     <th class="${getCls('allStock','商品代金')}" onclick="triggerSort('allStock','商品代金')">価格</th>
                     <th class="${getCls('allStock','いいね！')}" onclick="triggerSort('allStock','いいね！')">いいね</th>
@@ -1943,6 +2001,7 @@
                     const orderNo = d['注文NO'] || '-';
                     const sku = d['SKU'] || '-';
                     const category = getCategory(d);
+                    const shipping = d['配送の方法'] || '未定';
                     const rowKey = encodeURIComponent(d['商品ID'] || d['商品名']);
 
                     hA += `<tr>
@@ -1963,6 +2022,9 @@
                             ${category}
                         </td>
                         <td><a href="${d['商品URL']||'#'}" target="_blank" class="prod-link">${d['商品名']}</a></td>
+                        <td class="editable-cell" ondblclick="enableEditField(this, 'listing', '${rowKey}', '配送の方法')" title="✏️ ダブルクリックで編集" style="font-weight:bold; color:#334155;">
+                            ${shipping}
+                        </td>
                         <td class="editable-cell" ondblclick="enableEditField(this, 'listing', '${rowKey}', '仕入れ単価')" title="✏️ ダブルクリックで編集" style="color:#DC2626; font-weight:800;">
                             ${cost ? '¥'+cost.toLocaleString() : '-'}
                         </td>
@@ -1976,6 +2038,7 @@
                 const badgeStock = document.getElementById('badge-stock-count');
                 if (badgeStock) badgeStock.innerText = `表示 ${dataA.length.toLocaleString()} / 全 ${rawListing.length.toLocaleString()} 件`;
 
+                // 販売品一覧
                 let dataS = sortTableData(rawSales, sortState.salesList.key, sortState.salesList.dir);            
                 let hS = `<table><thead><tr>
                     <th class="${getCls('salesList','購入完了日')}" onclick="triggerSort('salesList','購入完了日')">完了日</th>
@@ -2179,17 +2242,7 @@
                             labels: { boxWidth: 10, font: { size: 10, weight: 'bold' } } 
                         } 
                     }, 
-                    cutout: '52%',
-                    onClick: (event, elements, chart) => {
-                        if (elements.length > 0) {
-                            const clickedIndex = elements[0].index;
-                            const clickedCategory = chart.data.labels[clickedIndex];
-                            showPage('allStockPage');
-                            selectedCategories = [clickedCategory];
-                            isFirstLoadStock = false;
-                            rebuildTables();
-                        }
-                    }
+                    cutout: '52%'
                 },
                 plugins: [pieDataLabelsPlugin]
             });        
@@ -2209,6 +2262,7 @@
                     'SKU': item['SKU'] || '',
                     '種類': getCategory(item),
                     '商品名': item['商品名'] || '',
+                    '配送の方法': item['配送の方法'] || '未定',
                     '仕入れ単価': parseInt(item['仕入れ単価']) || 0,
                     '価格': parseInt(String(item['商品代金'] || '0').replace(/[^0-9]/g, '')) || 0,
                     'いいね！': parseInt(item['いいね！']) || 0,
