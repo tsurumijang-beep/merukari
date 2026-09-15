@@ -747,7 +747,7 @@
         .file-status { font-size: 0.74rem; color: #486581; text-align: center; margin-bottom: 3px; font-weight: 700; }
         hr { width:100%; border:0; border-top: 1.5px dashed #BCCCDC; margin: 6px 0; }    
 
-        /* 팝업 모달 스타일 */
+        /* ポップアップモーダルスタイル */
         #excludeModal {
             display: none;
             position: fixed;
@@ -816,21 +816,58 @@
         }
         .modal-ok-btn:hover { filter: brightness(1.1); }
         .modal-ok-btn:active { transform: translateY(2px); }
+
+        /* 一括種類入力バーのスタイル */
+        .batch-action-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+            padding: 8px 14px;
+            border-radius: 14px;
+            margin-bottom: 8px;
+            border: 1px solid #BFDBFE;
+            box-shadow: var(--clay-tile);
+        }
+        .batch-action-bar input[type="text"] {
+            padding: 5px 10px;
+            border: 1px solid #93C5FD;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            width: 140px;
+            outline: none;
+            background: #FFFFFF;
+            color: #1E40AF;
+        }
+        .batch-action-btn {
+            background: linear-gradient(180deg, #2563EB 0%, #1D4ED8 100%);
+            color: white;
+            border: none;
+            padding: 5px 14px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: var(--btn-3d);
+        }
+        .batch-action-btn:hover { filter: brightness(1.1); }
+        .batch-action-btn:active { transform: translateY(2px); }
     </style>
 </head>
 <body>
-    <!-- 제외된 항목 확인 팝업 모달 -->
+    <!-- 除外された項目確認用ポップアップモーダル -->
     <div id="excludeModal">
         <div class="modal-content">
             <div class="modal-title">
                 <span>🔔 販売済み等のため在庫から除外された商品</span>
             </div>
             <div style="font-size: 0.82rem; color: #64748B;">
-                다음 출품 타이틀의 상품들이 판매 완료 등으로 인해 「전재고 일람」에서 자동 제외되었습니다.
+                以下の出品タイトルの商品が販売完了等のため「全在庫一覧」から自動除外されました。
             </div>
             <div class="modal-body" id="excludeModalList"></div>
             <div class="modal-footer">
-                <button class="modal-ok-btn" onclick="closeExcludeModal()">확인</button>
+                <button class="modal-ok-btn" onclick="closeExcludeModal()">確認</button>
             </div>
         </div>
     </div>
@@ -958,7 +995,17 @@
                         <span>|</span>
                         <div class="stock-stat-group">表示中: <span class="stock-stat-val" style="color:#16A34A;" id="stat-sel-stock-cnt">0</span></div>
                     </div>
-                    <button class="excel-down-btn" onclick="exportToExcel('allStock')">📊 Excel ダウン로드 (.xlsx)</button>
+                    <button class="excel-down-btn" onclick="exportToExcel('allStock')">📊 Excel ダウンロード (.xlsx)</button>
+                </div>
+                <!-- 一括種類入力コントロールバー -->
+                <div class="batch-action-bar">
+                    <label style="font-size:0.82rem; font-weight:900; color:#1E40AF; display:flex; align-items:center; gap:4px;">
+                        <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAllStock(this)" style="cursor:pointer;"> 全選択
+                    </label>
+                    <span style="color:#93C5FD;">|</span>
+                    <span style="font-size:0.82rem; font-weight:800; color:#1E40AF;" id="selectedCountText">0件選択中</span>
+                    <input type="text" id="batchCategoryInput" placeholder="入力する種類 (例: ワンピース)">
+                    <button class="batch-action-btn" onclick="applyBatchCategory()">選択項目の種類を一括適用</button>
                 </div>
                 <div id="allStockTable"></div>
             </div>
@@ -981,7 +1028,7 @@
                         <span>|</span>
                         <div class="sales-stat-item">平均純利益率: <span class="sales-stat-val" style="color:#2563EB;" id="stat-avg-margin">0.0%</span></div>
                     </div>
-                    <button class="excel-down-btn" onclick="exportToExcel('salesList')">📊 Excel ダウン로드 (.xlsx)</button>
+                    <button class="excel-down-btn" onclick="exportToExcel('salesList')">📊 Excel ダウンロード (.xlsx)</button>
                 </div>
                 <div id="salesListTable"></div>
             </div>
@@ -1007,16 +1054,16 @@
         if (!rawListing || rawListing.length === 0) {
             rawListing = [
                 { '出品日時': '2026-08-01 10:00:00', '管理番号': 'H023', '商品名': '新品未使用 27cm ハイヒール H023 大きいサイズ', '商品代金': '2980', 'いいね！': '5', '商品URL': '#' },
-                { '出品日時': '2026-06-15 12:00:00', '管理番号': '1105', '商品名': '심플 원피스 드레스 파스텔', '商品代金': '4500', 'いいね！': '12', '商品URL': '#' },
-                { '出品日時': '2026-07-20 14:30:00', '管理番号': '1180', '商品名': '하이힐 스틸레토 펜슬', '商品代金': '3800', 'いいね！': '3', '商品URL': '#' }
+                { '出品日時': '2026-06-15 12:00:00', '管理番号': '1105', '商品名': 'シンプルワンピースドレス パステル', '商品代金': '4500', 'いいね！': '12', '商品URL': '#' },
+                { '出品日時': '2026-07-20 14:30:00', '管理番号': '1180', '商品名': 'ハイヒール スティレット ペンシル', '商品代金': '3800', 'いいね！': '3', '商品URL': '#' }
             ];
             localStorage.setItem('mercari_last_listing', JSON.stringify(rawListing));
         }
 
         if (!rawSales || rawSales.length === 0) {
             rawSales = [
-                { '購入完了日': '2026-09-02 15:20:00', '管理番号': 'A190', '商品名': '여성 오프숄더 블라우스', '商品代金': '3200', '販売利益': '2880', '配送の方法': 'ゆうゆうメルカリ便', '仕入れ単価': 1000, '商品URL': '#' },
-                { '購入完了日': '2026-09-10 11:10:00', '管理番号': '1195', '商品名': '슬림핏 스커트 미디엄', '商品代金': '2500', '販売利益': '2250', '配送の方法': 'らくらくメルカリ便', '仕入れ単価': 800, '商品URL': '#' }
+                { '購入完了日': '2026-09-02 15:20:00', '管理番号': 'A190', '商品名': '女性オフショルダーブラウス', '商品代金': '3200', '販売利益': '2880', '配送の方法': 'ゆうゆうメルカリ便', '仕入れ単価': 1000, '商品URL': '#' },
+                { '購入完了日': '2026-09-10 11:10:00', '管理番号': '1195', '商品名': 'スリムフィットスカート ミディアム', '商品代金': '2500', '販売利益': '2250', '配送の方法': 'らくらくメルカリ便', '仕入れ単価': 800, '商品URL': '#' }
             ];
             localStorage.setItem('mercari_last_sales', JSON.stringify(rawSales));
         }
@@ -1142,7 +1189,6 @@
                             count++;
                         }
                         
-                        // 상품명 기준으로도 마스터 맵에 단가 보존 (최종 갱신 데이터 유지)[cite: 1]
                         if (productName) {
                             if (!masterMap[productName]) masterMap[productName] = {};
                             masterMap[productName].cost = cost;
@@ -1174,7 +1220,6 @@
             return null;
         }
 
-        // 💡 상품명 및 관리번호 기준으로 로컬(마스터)에 보존된 仕入れ単価 및 최신 데이터를 매칭·갱신[cite: 1]
         function applyMasterData() {
             [rawListing, rawSales].forEach(list => {
                 if (!Array.isArray(list)) return;
@@ -1189,9 +1234,7 @@
                         item['管理番号'] = item['管理番号'] || '-';
                     }
 
-                    // 1단계: 관리번호 기준으로 마스터 데이터 반영
                     let matchedMaster = masterMap[item['管理番号']];
-                    // 2단계: 관리번호로 없거나 단가가 없을 경우 상품명 기준으로 최종 갱신된 단가/데이터 탐색 반영[cite: 1]
                     if ((!matchedMaster || !matchedMaster.cost) && pName && masterMap[pName]) {
                         matchedMaster = masterMap[pName];
                     }
@@ -1200,13 +1243,13 @@
                         item['注文NO'] = item['注文NO'] && item['注文NO'] !== '-' ? item['注文NO'] : (matchedMaster.orderNo || '-');
                         item['SKU'] = item['SKU'] && item['SKU'] !== '-' ? item['SKU'] : (matchedMaster.sku || '-');
                         
-                        // 기존에 등록된 仕入れ単価가 없거나 0일 경우 로컬에 보존된 최종 갱신 데이터 적용[cite: 1]
                         if (item['仕入れ単価'] === undefined || item['仕入れ単価'] === 0 || item['仕入れ単価'] === '-' || item['仕入れ単価'] === '') {
                             item['仕入れ単価'] = matchedMaster.cost || 0;
                         }
 
-                        if (matchedMaster.category && (!item['手動種類'] || item['手動種類'] === '-')) {
-                            item['手動種類'] = matchedMaster.category;
+                        const storedCat = matchedMaster.category || (masterMap[pName] ? masterMap[pName].category : '');
+                        if (storedCat && (!item['手動種類'] || item['手動種類'] === '-')) {
+                            item['手動種類'] = storedCat;
                         }
                     } else {
                         item['注文NO'] = item['注文NO'] || '-';
@@ -1240,25 +1283,25 @@
                 isSaved = true;
 
                 let val = input.value.trim();
+                const code = targetItem['管理番号'];
                 const pName = targetItem['商品名'];
 
                 if (fieldName === '管理番号') {
-                    const code = val ? val : '-';
-                    targetItem['管理番号'] = code;
+                    const newCode = val ? val : '-';
+                    targetItem['管理番号'] = newCode;
 
-                    if (code !== '-' && masterMap[code]) {
-                        targetItem['注文NO'] = masterMap[code].orderNo || targetItem['注文NO'] || '-';
-                        targetItem['SKU'] = masterMap[code].sku || targetItem['SKU'] || '-';
-                        targetItem['仕入れ単価'] = masterMap[code].cost !== undefined ? masterMap[code].cost : (targetItem['仕入れ単価'] || 0);
-                        if (masterMap[code].category) {
-                            targetItem['手動種類'] = masterMap[code].category;
+                    if (newCode !== '-' && masterMap[newCode]) {
+                        targetItem['注文NO'] = masterMap[newCode].orderNo || targetItem['注文NO'] || '-';
+                        targetItem['SKU'] = masterMap[newCode].sku || targetItem['SKU'] || '-';
+                        targetItem['仕入れ単価'] = masterMap[newCode].cost !== undefined ? masterMap[newCode].cost : (targetItem['仕入れ単価'] || 0);
+                        if (masterMap[newCode].category) {
+                            targetItem['手動種類'] = masterMap[newCode].category;
                         }
                     }
                 } else if (fieldName === '仕入れ単価') {
                     const numVal = parseInt(val.replace(/[^0-9]/g, '')) || 0;
                     targetItem['仕入れ単価'] = numVal;
 
-                    const code = targetItem['管理番号'];
                     if (code && code !== '-') {
                         if (!masterMap[code]) masterMap[code] = {};
                         masterMap[code].cost = numVal;
@@ -1270,7 +1313,6 @@
                     localStorage.setItem('mercari_master_map', JSON.stringify(masterMap));
                 } else if (fieldName === '種類') {
                     targetItem['手動種類'] = val || '';
-                    const code = targetItem['管理番号'];
                     if (code && code !== '-') {
                         if (!masterMap[code]) masterMap[code] = {};
                         masterMap[code].category = val || '';
@@ -1282,7 +1324,6 @@
                     localStorage.setItem('mercari_master_map', JSON.stringify(masterMap));
                 } else {
                     targetItem[fieldName] = val || '-';
-                    const code = targetItem['管理番号'];
                     if (code && code !== '-') {
                         if (!masterMap[code]) masterMap[code] = {};
                         if (fieldName === '注文NO') masterMap[code].orderNo = val || '-';
@@ -1307,13 +1348,69 @@
             });
         }
 
+        function updateSelectedStockCount() {
+            const checkboxes = document.querySelectorAll('.stock-select-checkbox');
+            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const textEl = document.getElementById('selectedCountText');
+            if (textEl) textEl.innerText = `${checkedCount}件選択中`;
+        }
+
+        function toggleSelectAllStock(masterCb) {
+            const checkboxes = document.querySelectorAll('.stock-select-checkbox');
+            checkboxes.forEach(cb => cb.checked = masterCb.checked);
+            updateSelectedStockCount();
+        }
+
+        function applyBatchCategory() {
+            const categoryInput = document.getElementById('batchCategoryInput');
+            const newCat = (categoryInput.value || '').trim();
+            if (!newCat) {
+                alert("適用する種類名を入力してください。");
+                categoryInput.focus();
+                return;
+            }
+
+            const checkboxes = document.querySelectorAll('.stock-select-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert("選択された商品がありません。種類を変更する商品をチェックしてください。");
+                return;
+            }
+
+            checkboxes.forEach(cb => {
+                const rowKey = decodeURIComponent(cb.getAttribute('data-rowkey'));
+                const targetItem = rawListing.find(it => (it['商品ID'] && it['商品ID'] === rowKey) || (it['商品名'] === rowKey));
+                if (targetItem) {
+                    targetItem['手動種類'] = newCat;
+                    const code = targetItem['管理番号'];
+                    const pName = targetItem['商品名'];
+
+                    if (code && code !== '-') {
+                        if (!masterMap[code]) masterMap[code] = {};
+                        masterMap[code].category = newCat;
+                    }
+                    if (pName) {
+                        if (!masterMap[pName]) masterMap[pName] = {};
+                        masterMap[pName].category = newCat;
+                    }
+                }
+            });
+
+            localStorage.setItem('mercari_last_listing', JSON.stringify(rawListing));
+            localStorage.setItem('mercari_master_map', JSON.stringify(masterMap));
+
+            categoryInput.value = '';
+            document.getElementById('selectAllCheckbox').checked = false;
+            updateAllUI();
+            alert(`選択した ${checkboxes.length}件 の商品の種類が [ ${newCat} ] に一括適用され、ローカルに保存されました。`);
+        }
+
         function showExcludeModal(excludedItems) {
             if (!excludedItems || excludedItems.length === 0) return;
             const listEl = document.getElementById('excludeModalList');
             listEl.innerHTML = excludedItems.map((item, idx) => `
                 <div class="excluded-item-row">
-                    <span><b>${idx + 1}.</b> ${item['商品名'] || '상품명 없음'}</span>
-                    <span style="color: #64748B; font-size: 0.78rem; white-space: nowrap;">[관리번호: ${item['管理番号'] || '-'}]</span>
+                    <span><b>${idx + 1}.</b> ${item['商品名'] || '商品名なし'}</span>
+                    <span style="color: #64748B; font-size: 0.78rem; white-space: nowrap;">[管理番号: ${item['管理番号'] || '-'}]</span>
                 </div>
             `).join('');
             document.getElementById('excludeModal').style.display = 'flex';
@@ -1399,7 +1496,6 @@
             const fee = Math.floor(price * 0.1);
             const profit = price - fee;
 
-            // 수동 판매 처리 시에도 상품명/관리번호 기준 보존된 단가 반영[cite: 1]
             const pName = matchedItem['商品名'];
             let savedCost = matchedItem['仕入れ単価'] || 0;
             if (!savedCost && masterMap[codeRaw] && masterMap[codeRaw].cost) savedCost = masterMap[codeRaw].cost;
@@ -1820,6 +1916,7 @@
                 setTxt('stat-sel-stock-cnt', `${filteredListing.length}건`);
 
                 let hA = `<table><thead><tr>
+                    <th style="width: 35px; text-align: center;">選択</th>
                     <th class="${getCls('allStock','出品日時')}" onclick="triggerSort('allStock','出品日時')">出品日時</th>
                     <th>管理番号</th>
                     <th class="${getCls('allStock','注文NO')}" onclick="triggerSort('allStock','注文NO')">注文NO</th>
@@ -1849,6 +1946,9 @@
                     const rowKey = encodeURIComponent(d['商品ID'] || d['商品名']);
 
                     hA += `<tr>
+                        <td style="text-align: center;">
+                            <input type="checkbox" class="stock-select-checkbox" data-rowkey="${rowKey}" onchange="updateSelectedStockCount()" style="cursor: pointer;">
+                        </td>
                         <td>${d['出品日時']||'-'}</td>
                         <td class="editable-cell" ondblclick="enableEditField(this, 'listing', '${rowKey}', '管理番号')" title="✏️ ダブルクリックで編集" style="font-weight:bold; color:${code === '-' ? '#94A3B8' : '#0284C7'};">
                             ${code}
