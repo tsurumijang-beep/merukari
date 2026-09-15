@@ -746,9 +746,95 @@
         input[type="file"] { display: none; }
         .file-status { font-size: 0.74rem; color: #486581; text-align: center; margin-bottom: 3px; font-weight: 700; }
         hr { width:100%; border:0; border-top: 1.5px dashed #BCCCDC; margin: 6px 0; }    
+
+        /* 팝업 모달 스타일 */
+        #excludeModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background: #FFFFFF;
+            width: 500px;
+            max-width: 90vw;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            animation: modalFadeIn 0.2s ease-out;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-title {
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: #1E40AF;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .modal-body {
+            max-height: 250px;
+            overflow-y: auto;
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 12px;
+        }
+        .excluded-item-row {
+            font-size: 0.85rem;
+            padding: 6px 0;
+            border-bottom: 1px solid #EDF2F7;
+            color: #334155;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .excluded-item-row:last-child { border-bottom: none; }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+        }
+        .modal-ok-btn {
+            background: linear-gradient(180deg, #2563EB 0%, #1D4ED8 100%);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: var(--btn-3d);
+        }
+        .modal-ok-btn:hover { filter: brightness(1.1); }
+        .modal-ok-btn:active { transform: translateY(2px); }
     </style>
 </head>
 <body>
+    <!-- 제외된 항목 확인 팝업 모달 -->
+    <div id="excludeModal">
+        <div class="modal-content">
+            <div class="modal-title">
+                <span>🔔 販売済み等のため在庫から除外された商品</span>
+            </div>
+            <div style="font-size: 0.82rem; color: #64748B;">
+                다음 출품 타이틀의 상품들이 판매 완료 등으로 인해 「전재고 일람」에서 자동 제외되었습니다.
+            </div>
+            <div class="modal-body" id="excludeModalList"></div>
+            <div class="modal-footer">
+                <button class="modal-ok-btn" onclick="closeExcludeModal()">확인</button>
+            </div>
+        </div>
+    </div>
+
     <nav>        
         <div class="logo" onclick="showPage('dashboardPage')">Dashboard</div>        
         <button class="menu-btn" onclick="showPage('allStockPage')">
@@ -1039,19 +1125,29 @@
                     let count = 0;
                     rows.forEach(r => {
                         const rawCode = r['メルカリ管理NO'] !== undefined ? r['メルカリ管理NO'] : (r['メルカリ管理番号'] || r['管理番号'] || r['管理NO']);
-                        if (rawCode === undefined || rawCode === null || String(rawCode).trim() === '') return;
-
-                        const code = String(rawCode).trim();
+                        const productName = String(r['商品名'] || '').trim();
+                        const cost = parseInt(String(r['仕入れ単価'] || '0').replace(/[^0-9]/g, '')) || 0;
                         const orderNo = String(r['注文NO'] || r['注文番号'] || '').trim();
                         const sku = String(r['SKU'] || '').trim();
-                        const cost = parseInt(String(r['仕入れ単価'] || '0').replace(/[^0-9]/g, '')) || 0;
+                        const category = String(r['種類'] || r['カテゴリ'] || '').trim();
 
-                        masterMap[code] = {
-                            orderNo: orderNo || (masterMap[code] ? masterMap[code].orderNo : '-'),
-                            sku: sku || (masterMap[code] ? masterMap[code].sku : '-'),
-                            cost: cost
-                        };
-                        count++;
+                        if (rawCode !== undefined && rawCode !== null && String(rawCode).trim() !== '') {
+                            const code = String(rawCode).trim();
+                            masterMap[code] = {
+                                orderNo: orderNo || (masterMap[code] ? masterMap[code].orderNo : '-'),
+                                sku: sku || (masterMap[code] ? masterMap[code].sku : '-'),
+                                cost: cost,
+                                category: category || (masterMap[code] ? masterMap[code].category : '')
+                            };
+                            count++;
+                        }
+                        
+                        // 상품명 기준으로도 마스터 맵에 단가 보존 (최종 갱신 데이터 유지)[cite: 1]
+                        if (productName) {
+                            if (!masterMap[productName]) masterMap[productName] = {};
+                            masterMap[productName].cost = cost;
+                            if (category) masterMap[productName].category = category;
+                        }
                     });
 
                     localStorage.setItem('mercari_master_map', JSON.stringify(masterMap));
@@ -1064,7 +1160,6 @@
             reader.readAsArrayBuffer(file);
         }
 
-        // 💡 대문자 알파벳과 숫자가 조합된 4자리 문자열(예: H023)을 최우선으로 추출하도록 수정된 함수
         function extractStockCode(str) {
             if (!str) return null;
             const matchAlphaNum = str.match(/\b([A-Z0-9]{4})\b/) || str.match(/[\s _#\-]([A-Z0-9]{4})[\s _#\-]/) || str.match(/([A-Z][A-Z0-9]{3})/);
@@ -1079,21 +1174,41 @@
             return null;
         }
 
+        // 💡 상품명 및 관리번호 기준으로 로컬(마스터)에 보존된 仕入れ単価 및 최신 데이터를 매칭·갱신[cite: 1]
         function applyMasterData() {
             [rawListing, rawSales].forEach(list => {
                 if (!Array.isArray(list)) return;
                 list.forEach(item => {
                     const rawItemCode = item['メルカリ管理番号'] || item['管理番号'];
                     const code = (rawItemCode && rawItemCode !== '-') ? String(rawItemCode).trim() : extractStockCode(item['商品名']);
+                    const pName = String(item['商品名'] || '').trim();
+
                     if (code) {
                         item['管理番号'] = code;
-                        if (masterMap[code]) {
-                            item['注文NO'] = item['注文NO'] && item['注文NO'] !== '-' ? item['注文NO'] : (masterMap[code].orderNo || '-');
-                            item['SKU'] = item['SKU'] && item['SKU'] !== '-' ? item['SKU'] : (masterMap[code].sku || '-');
-                            item['仕入れ単価'] = item['仕入れ単価'] !== undefined && item['仕入れ単価'] !== 0 ? item['仕入れ単価'] : (masterMap[code].cost || 0);
-                        }
                     } else {
                         item['管理番号'] = item['管理番号'] || '-';
+                    }
+
+                    // 1단계: 관리번호 기준으로 마스터 데이터 반영
+                    let matchedMaster = masterMap[item['管理番号']];
+                    // 2단계: 관리번호로 없거나 단가가 없을 경우 상품명 기준으로 최종 갱신된 단가/데이터 탐색 반영[cite: 1]
+                    if ((!matchedMaster || !matchedMaster.cost) && pName && masterMap[pName]) {
+                        matchedMaster = masterMap[pName];
+                    }
+
+                    if (matchedMaster) {
+                        item['注文NO'] = item['注文NO'] && item['注文NO'] !== '-' ? item['注文NO'] : (matchedMaster.orderNo || '-');
+                        item['SKU'] = item['SKU'] && item['SKU'] !== '-' ? item['SKU'] : (matchedMaster.sku || '-');
+                        
+                        // 기존에 등록된 仕入れ単価가 없거나 0일 경우 로컬에 보존된 최종 갱신 데이터 적용[cite: 1]
+                        if (item['仕入れ単価'] === undefined || item['仕入れ単価'] === 0 || item['仕入れ単価'] === '-' || item['仕入れ単価'] === '') {
+                            item['仕入れ単価'] = matchedMaster.cost || 0;
+                        }
+
+                        if (matchedMaster.category && (!item['手動種類'] || item['手動種類'] === '-')) {
+                            item['手動種類'] = matchedMaster.category;
+                        }
+                    } else {
                         item['注文NO'] = item['注文NO'] || '-';
                         item['SKU'] = item['SKU'] || '-';
                         item['仕入れ単価'] = item['仕入れ単価'] || 0;
@@ -1125,6 +1240,7 @@
                 isSaved = true;
 
                 let val = input.value.trim();
+                const pName = targetItem['商品名'];
 
                 if (fieldName === '管理番号') {
                     const code = val ? val : '-';
@@ -1134,6 +1250,9 @@
                         targetItem['注文NO'] = masterMap[code].orderNo || targetItem['注文NO'] || '-';
                         targetItem['SKU'] = masterMap[code].sku || targetItem['SKU'] || '-';
                         targetItem['仕入れ単価'] = masterMap[code].cost !== undefined ? masterMap[code].cost : (targetItem['仕入れ単価'] || 0);
+                        if (masterMap[code].category) {
+                            targetItem['手動種類'] = masterMap[code].category;
+                        }
                     }
                 } else if (fieldName === '仕入れ単価') {
                     const numVal = parseInt(val.replace(/[^0-9]/g, '')) || 0;
@@ -1143,10 +1262,24 @@
                     if (code && code !== '-') {
                         if (!masterMap[code]) masterMap[code] = {};
                         masterMap[code].cost = numVal;
-                        localStorage.setItem('mercari_master_map', JSON.stringify(masterMap));
                     }
+                    if (pName) {
+                        if (!masterMap[pName]) masterMap[pName] = {};
+                        masterMap[pName].cost = numVal;
+                    }
+                    localStorage.setItem('mercari_master_map', JSON.stringify(masterMap));
                 } else if (fieldName === '種類') {
                     targetItem['手動種類'] = val || '';
+                    const code = targetItem['管理番号'];
+                    if (code && code !== '-') {
+                        if (!masterMap[code]) masterMap[code] = {};
+                        masterMap[code].category = val || '';
+                    }
+                    if (pName) {
+                        if (!masterMap[pName]) masterMap[pName] = {};
+                        masterMap[pName].category = val || '';
+                    }
+                    localStorage.setItem('mercari_master_map', JSON.stringify(masterMap));
                 } else {
                     targetItem[fieldName] = val || '-';
                     const code = targetItem['管理番号'];
@@ -1174,8 +1307,24 @@
             });
         }
 
+        function showExcludeModal(excludedItems) {
+            if (!excludedItems || excludedItems.length === 0) return;
+            const listEl = document.getElementById('excludeModalList');
+            listEl.innerHTML = excludedItems.map((item, idx) => `
+                <div class="excluded-item-row">
+                    <span><b>${idx + 1}.</b> ${item['商品名'] || '상품명 없음'}</span>
+                    <span style="color: #64748B; font-size: 0.78rem; white-space: nowrap;">[관리번호: ${item['管理番号'] || '-'}]</span>
+                </div>
+            `).join('');
+            document.getElementById('excludeModal').style.display = 'flex';
+        }
+
+        function closeExcludeModal() {
+            document.getElementById('excludeModal').style.display = 'none';
+        }
+
         function removeSoldFromListing() {
-            if (!rawSales.length || !rawListing.length) return 0;
+            if (!rawSales.length || !rawListing.length) return [];
             
             const soldIds = new Set();
             const soldUrls = new Set();
@@ -1189,24 +1338,29 @@
                 if (code) soldCodes.add(code);
             });
 
-            const initialCount = rawListing.length;
+            let excludedItems = [];
             rawListing = rawListing.filter(item => {
                 const id = String(item['商品ID'] || '').trim();
                 const url = String(item['商品URL'] || '').trim();
                 const rawICode = item['メルカリ管理番号'] || item['管理番号'];
                 const code = (rawICode && rawICode !== '-') ? String(rawICode).trim() : extractStockCode(item['商品名']);
 
-                if (id && soldIds.has(id)) return false;
-                if (url && soldUrls.has(url)) return false;
-                if (code && soldCodes.has(code)) return false;
+                let isExcluded = false;
+                if (id && soldIds.has(id)) isExcluded = true;
+                if (url && soldUrls.has(url)) isExcluded = true;
+                if (code && soldCodes.has(code)) isExcluded = true;
+
+                if (isExcluded) {
+                    excludedItems.push(item);
+                    return false;
+                }
                 return true;
             });
 
-            const removedCount = initialCount - rawListing.length;
-            if (removedCount > 0) {
+            if (excludedItems.length > 0) {
                 localStorage.setItem('mercari_last_listing', JSON.stringify(rawListing));
             }
-            return removedCount;
+            return excludedItems;
         }
 
         function processManualSold() {
@@ -1245,10 +1399,16 @@
             const fee = Math.floor(price * 0.1);
             const profit = price - fee;
 
+            // 수동 판매 처리 시에도 상품명/관리번호 기준 보존된 단가 반영[cite: 1]
+            const pName = matchedItem['商品名'];
+            let savedCost = matchedItem['仕入れ単価'] || 0;
+            if (!savedCost && masterMap[codeRaw] && masterMap[codeRaw].cost) savedCost = masterMap[codeRaw].cost;
+            if (!savedCost && pName && masterMap[pName] && masterMap[pName].cost) savedCost = masterMap[pName].cost;
+
             const newSoldItem = {
                 '購入完了日': nowStr,
                 '商品ID': matchedItem['商品ID'] || ('manual_' + Date.now()),
-                '商品名': matchedItem['商品名'] || `手動販売商品 (${codeRaw})`,
+                '商品名': pName || `手動販売商品 (${codeRaw})`,
                 '商品URL': matchedItem['商品URL'] || '#',
                 '商品代金': price.toString(),
                 '販売利益': profit.toString(),
@@ -1256,7 +1416,7 @@
                 '管理番号': codeRaw,
                 '注文NO': matchedItem['注文NO'] || (masterMap[codeRaw] ? masterMap[codeRaw].orderNo : '-'),
                 'SKU': matchedItem['SKU'] || (masterMap[codeRaw] ? masterMap[codeRaw].sku : '-'),
-                '仕入れ単価': matchedItem['仕入れ単価'] || (masterMap[codeRaw] ? masterMap[codeRaw].cost : 0)
+                '仕入れ単価': savedCost
             };
 
             rawSales.unshift(newSoldItem);
@@ -1265,9 +1425,7 @@
             localStorage.setItem('mercari_last_sales', JSON.stringify(rawSales));
 
             updateAllUI();
-
-            alert(`✅ 管理番号 [ ${codeRaw} ] の販売処理が完了しました！\n\n・商品名: ${matchedItem['商品名']}\n・価格: ¥${price.toLocaleString()}\n「全在庫一覧」から除外され、「販売品一覧」に反映されました。`);
-            inputEl.value = '';
+            showExcludeModal([matchedItem]);
         }
 
         const applyBtnEl = document.getElementById('applyBtn');
@@ -1282,10 +1440,14 @@
 
                 if (target === 0) {
                     if (rawListing.length > 0 || rawSales.length > 0 || Object.keys(masterMap).length > 0) {
-                        const removed = removeSoldFromListing();
                         applyMasterData();
+                        const excludedItems = removeSoldFromListing();
                         updateAllUI();
-                        alert(`保存されている既存データを反映しました。${removed > 0 ? `\n(販売済み在庫 ${removed}件を除外)` : ''}`);
+                        if (excludedItems.length > 0) {
+                            showExcludeModal(excludedItems);
+                        } else {
+                            alert("保存されている既存データを反映しました。");
+                        }
                     } else {
                         alert("反映するファイルが選択されておらず、保存データもありません。");
                     }
@@ -1322,10 +1484,14 @@
                 function check() { 
                     loaded++; 
                     if(loaded === target) { 
-                        const removed = removeSoldFromListing();
                         applyMasterData();
+                        const excludedItems = removeSoldFromListing();
                         updateAllUI(); 
-                        alert(`新しいデータを反映しました。${removed > 0 ? `\n(販売済みの在庫 ${removed}件が「全在庫一覧」から自動除外されました)` : ''}`); 
+                        if (excludedItems.length > 0) {
+                            showExcludeModal(excludedItems);
+                        } else {
+                            alert("新しいデータを反映しました。");
+                        }
                     } 
                 }        
             };
@@ -1353,13 +1519,17 @@
                         if(imported.listing) rawListing = imported.listing;
                         if(imported.sales) rawSales = imported.sales;
                         if(imported.master) masterMap = { ...masterMap, ...imported.master };
-                        removeSoldFromListing();
                         applyMasterData();
+                        const excludedItems = removeSoldFromListing();
                         localStorage.setItem('mercari_last_listing', JSON.stringify(rawListing));
                         localStorage.setItem('mercari_last_sales', JSON.stringify(rawSales));
                         localStorage.setItem('mercari_master_map', JSON.stringify(masterMap));
                         updateAllUI();
-                        alert("バックアップデータが正常にインポートされ、反映されました。");
+                        if (excludedItems.length > 0) {
+                            showExcludeModal(excludedItems);
+                        } else {
+                            alert("バックアップデータが正常にインポートされ、反映されました。");
+                        }
                     } catch(err) {
                         alert("JSONファイルの読み込みに失敗しました。");
                     }
@@ -1444,24 +1614,19 @@
             }        
         }
 
-        function categorize(name) {            
-            if (!name) return 'その他';            
-            const n = name.toLowerCase();            
-            if (n.includes('水着')) return '水着';            
-            if (n.includes('ハイヒール') || n.includes('パンプス')) return '靴';            
-            if (n.includes('ボディコン')) return 'ボディコン';            
-            if (n.includes('ワンピース') || n.includes('ワンピ')) return 'ワンピース';            
-            if (n.includes('スカート')) return 'スカート';            
-            if (n.includes('パンツ')) return 'パンツ';            
-            if (n.includes('インナー') || n.includes('ショーツ') || n.includes('ボディスーツ')) return 'インナー';            
-            return 'その他';        
-        }
-
         function getCategory(item) {
             if (item['手動種類'] && item['手動種類'].trim() !== '') {
                 return item['手動種類'].trim();
             }
-            return categorize(item['商品名']);
+            const code = item['管理番号'];
+            const pName = item['商品名'];
+            if (code && code !== '-' && masterMap[code] && masterMap[code].category) {
+                return masterMap[code].category;
+            }
+            if (pName && masterMap[pName] && masterMap[pName].category) {
+                return masterMap[pName].category;
+            }
+            return '-';
         }
 
         function renderCharts() {            
