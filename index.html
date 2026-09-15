@@ -796,8 +796,8 @@
         
         <div id="dashboardPage" class="page-content active-page">
             <div class="manual-input-box">
-                <label for="manualStockCode">🏷️ 管理番号（4桁）販売処理:</label>
-                <input type="text" id="manualStockCode" placeholder="例: 1249" maxlength="10">
+                <label for="manualStockCode">🏷️ 管理番号販売処理:</label>
+                <input type="text" id="manualStockCode" placeholder="例: H023" maxlength="10">
                 <button class="manual-btn" onclick="processManualSold()">販売完了処理</button>
                 <div class="manual-hint">※ 番号を入力すると「全在庫一覧」から除外され、「販売品一覧」へ即時反映されます。</div>
             </div>
@@ -920,7 +920,7 @@
 
         if (!rawListing || rawListing.length === 0) {
             rawListing = [
-                { '出品日時': '2026-08-01 10:00:00', '管理番号': '1201', '商品名': '핑크 Uネック ボディスーツ', '商品代金': '2980', 'いいね！': '5', '商品URL': '#' },
+                { '出品日時': '2026-08-01 10:00:00', '管理番号': 'H023', '商品名': '新品未使用 27cm ハイヒール H023 大きいサイズ', '商品代金': '2980', 'いいね！': '5', '商品URL': '#' },
                 { '出品日時': '2026-06-15 12:00:00', '管理番号': '1105', '商品名': '심플 원피스 드레스 파스텔', '商品代金': '4500', 'いいね！': '12', '商品URL': '#' },
                 { '出品日時': '2026-07-20 14:30:00', '管理番号': '1180', '商品名': '하이힐 스틸레토 펜슬', '商品代金': '3800', 'いいね！': '3', '商品URL': '#' }
             ];
@@ -929,7 +929,7 @@
 
         if (!rawSales || rawSales.length === 0) {
             rawSales = [
-                { '購入完了日': '2026-09-02 15:20:00', '管理番号': '1190', '商品名': '여성 오프숄더 블라우스', '商品代金': '3200', '販売利益': '2880', '配送の方法': 'ゆうゆうメルカリ便', '仕入れ単価': 1000, '商品URL': '#' },
+                { '購入完了日': '2026-09-02 15:20:00', '管理番号': 'A190', '商品名': '여성 오프숄더 블라우스', '商品代金': '3200', '販売利益': '2880', '配送の方法': 'ゆうゆうメルカリ便', '仕入れ単価': 1000, '商品URL': '#' },
                 { '購入完了日': '2026-09-10 11:10:00', '管理番号': '1195', '商品名': '슬림핏 스커트 미디엄', '商品代金': '2500', '販売利益': '2250', '配送の方法': 'らくらくメルカリ便', '仕入れ単価': 800, '商品URL': '#' }
             ];
             localStorage.setItem('mercari_last_sales', JSON.stringify(rawSales));
@@ -1041,7 +1041,7 @@
                         const rawCode = r['メルカリ管理NO'] !== undefined ? r['メルカリ管理NO'] : (r['メルカリ管理番号'] || r['管理番号'] || r['管理NO']);
                         if (rawCode === undefined || rawCode === null || String(rawCode).trim() === '') return;
 
-                        const code = String(rawCode).trim().padStart(4, '0');
+                        const code = String(rawCode).trim();
                         const orderNo = String(r['注文NO'] || r['注文番号'] || '').trim();
                         const sku = String(r['SKU'] || '').trim();
                         const cost = parseInt(String(r['仕入れ単価'] || '0').replace(/[^0-9]/g, '')) || 0;
@@ -1064,11 +1064,17 @@
             reader.readAsArrayBuffer(file);
         }
 
-        function extract4DigitCode(str) {
+        // 💡 대문자 알파벳과 숫자가 조합된 4자리 문자열(예: H023)을 최우선으로 추출하도록 수정된 함수
+        function extractStockCode(str) {
             if (!str) return null;
-            const match = str.match(/\b(\d{3,4})\b/) || str.match(/[\s _#\-](\d{3,4})[\s _#\-]/) || str.match(/(\d{3,4})/);
-            if (match) {
-                return match[1].padStart(4, '0');
+            const matchAlphaNum = str.match(/\b([A-Z0-9]{4})\b/) || str.match(/[\s _#\-]([A-Z0-9]{4})[\s _#\-]/) || str.match(/([A-Z][A-Z0-9]{3})/);
+            if (matchAlphaNum) {
+                return matchAlphaNum[1].trim();
+            }
+
+            const matchNum = str.match(/\b(\d{4})\b/) || str.match(/[\s _#\-](\d{4})[\s _#\-]/) || str.match(/(\d{4})/);
+            if (matchNum) {
+                return matchNum[1].trim();
             }
             return null;
         }
@@ -1077,7 +1083,8 @@
             [rawListing, rawSales].forEach(list => {
                 if (!Array.isArray(list)) return;
                 list.forEach(item => {
-                    const code = item['管理番号'] && item['管理番号'] !== '-' ? item['管理番号'] : extract4DigitCode(item['商品名']);
+                    const rawItemCode = item['メルカリ管理番号'] || item['管理番号'];
+                    const code = (rawItemCode && rawItemCode !== '-') ? String(rawItemCode).trim() : extractStockCode(item['商品名']);
                     if (code) {
                         item['管理番号'] = code;
                         if (masterMap[code]) {
@@ -1120,7 +1127,7 @@
                 let val = input.value.trim();
 
                 if (fieldName === '管理番号') {
-                    const code = val ? val.padStart(4, '0') : '-';
+                    const code = val ? val : '-';
                     targetItem['管理番号'] = code;
 
                     if (code !== '-' && masterMap[code]) {
@@ -1177,7 +1184,8 @@
             rawSales.forEach(s => {
                 if (s['商品ID']) soldIds.add(String(s['商品ID']).trim());
                 if (s['商品URL']) soldUrls.add(String(s['商品URL']).trim());
-                const code = (s['管理番号'] && s['管理番号'] !== '-') ? s['管理番号'] : extract4DigitCode(s['商品名']);
+                const rawSCode = s['メルカリ管理番号'] || s['管理番号'];
+                const code = (rawSCode && rawSCode !== '-') ? String(rawSCode).trim() : extractStockCode(s['商品名']);
                 if (code) soldCodes.add(code);
             });
 
@@ -1185,7 +1193,8 @@
             rawListing = rawListing.filter(item => {
                 const id = String(item['商品ID'] || '').trim();
                 const url = String(item['商品URL'] || '').trim();
-                const code = (item['管理番号'] && item['管理番号'] !== '-') ? item['管理番号'] : extract4DigitCode(item['商品名']);
+                const rawICode = item['メルカリ管理番号'] || item['管理番号'];
+                const code = (rawICode && rawICode !== '-') ? String(rawICode).trim() : extractStockCode(item['商品名']);
 
                 if (id && soldIds.has(id)) return false;
                 if (url && soldUrls.has(url)) return false;
@@ -1209,11 +1218,11 @@
                 inputEl.focus();
                 return;
             }
-            const code = codeRaw.padStart(4, '0');
 
             const foundIndex = rawListing.findIndex(item => {
-                const itemCode = (item['管理番号'] && item['管理番号'] !== '-') ? item['管理番号'] : extract4DigitCode(item['商品名']);
-                return itemCode === code || (item['商品名'] && item['商品名'].includes(codeRaw));
+                const rawICode = item['メルカリ管理番号'] || item['管理番号'];
+                const itemCode = (rawICode && rawICode !== '-') ? String(rawICode).trim() : extractStockCode(item['商品名']);
+                return itemCode === codeRaw || (item['商品名'] && item['商品名'].includes(codeRaw));
             });
 
             if (foundIndex === -1) {
@@ -1239,15 +1248,15 @@
             const newSoldItem = {
                 '購入完了日': nowStr,
                 '商品ID': matchedItem['商品ID'] || ('manual_' + Date.now()),
-                '商品名': matchedItem['商品名'] || `手動販売商品 (${code})`,
+                '商品名': matchedItem['商品名'] || `手動販売商品 (${codeRaw})`,
                 '商品URL': matchedItem['商品URL'] || '#',
                 '商品代金': price.toString(),
                 '販売利益': profit.toString(),
                 '配送の方法': matchedItem['配送の方法'] || 'ゆうゆうメルカリ便',
-                '管理番号': code,
-                '注文NO': matchedItem['注文NO'] || (masterMap[code] ? masterMap[code].orderNo : '-'),
-                'SKU': matchedItem['SKU'] || (masterMap[code] ? masterMap[code].sku : '-'),
-                '仕入れ単価': matchedItem['仕入れ単価'] || (masterMap[code] ? masterMap[code].cost : 0)
+                '管理番号': codeRaw,
+                '注文NO': matchedItem['注文NO'] || (masterMap[codeRaw] ? masterMap[codeRaw].orderNo : '-'),
+                'SKU': matchedItem['SKU'] || (masterMap[codeRaw] ? masterMap[codeRaw].sku : '-'),
+                '仕入れ単価': matchedItem['仕入れ単価'] || (masterMap[codeRaw] ? masterMap[codeRaw].cost : 0)
             };
 
             rawSales.unshift(newSoldItem);
@@ -1257,7 +1266,7 @@
 
             updateAllUI();
 
-            alert(`✅ 管理番号 [ ${code} ] の販売処理が完了しました！\n\n・商品名: ${matchedItem['商品名']}\n・価格: ¥${price.toLocaleString()}\n「全在庫一覧」から除外され、「販売品一覧」に反映されました。`);
+            alert(`✅ 管理番号 [ ${codeRaw} ] の販売処理が完了しました！\n\n・商品名: ${matchedItem['商品名']}\n・価格: ¥${price.toLocaleString()}\n「全在庫一覧」から除外され、「販売品一覧」に反映されました。`);
             inputEl.value = '';
         }
 
@@ -1577,7 +1586,6 @@
             return sortState[tableId].dir === 'asc' ? "sort-asc" : "sort-desc";        
         }
 
-        // --- 종류 복수 선택 드롭다운 관련 함수 ---
         function toggleMultiselectDropdown() {
             const content = document.getElementById('multiselectContent');
             if (content) content.classList.toggle('show');
@@ -1610,18 +1618,15 @@
 
         function rebuildTables() {            
             try {
-                // 고유 종류 목록 추출
                 const allCategoriesSet = new Set();
                 rawListing.forEach(d => allCategoriesSet.add(getCategory(d)));
                 const availableCategories = Array.from(allCategoriesSet).sort();
 
-                // 최초 실행 시 전체 선택이 기본값
                 if (isFirstLoadStock && availableCategories.length > 0) {
                     selectedCategories = [...availableCategories];
                     isFirstLoadStock = false;
                 }
 
-                // 1. 全在庫一覧 テーブル (선택된 종류가 없으면 전체 데이터 표시, 있으면 필터링)
                 let filteredListing = rawListing;
                 if (selectedCategories.length > 0) {
                     filteredListing = rawListing.filter(d => selectedCategories.includes(getCategory(d)));
@@ -1706,7 +1711,6 @@
                 const badgeStock = document.getElementById('badge-stock-count');
                 if (badgeStock) badgeStock.innerText = `表示 ${dataA.length.toLocaleString()} / 全 ${rawListing.length.toLocaleString()} 件`;
 
-                // 2. 販売品一覧 テーブル
                 let dataS = sortTableData(rawSales, sortState.salesList.key, sortState.salesList.dir);            
                 let hS = `<table><thead><tr>
                     <th class="${getCls('salesList','購入完了日')}" onclick="triggerSort('salesList','購入完了日')">完了日</th>
@@ -1757,7 +1761,6 @@
                 const tblS = document.getElementById('salesListTable');
                 if (tblS) tblS.innerHTML = hS + `</tbody></table>`;
 
-                // 3. 再出品予定 テーブル
                 const today = new Date();            
                 let dataR = rawListing.filter(d => {
                     if(!d['出品日時']) return false;
@@ -1912,16 +1915,11 @@
                         } 
                     }, 
                     cutout: '52%',
-                    // 종류별 구성 차트 각 항목 클릭 시 전재고일람으로 이동 및 해당 종류만 필터링
                     onClick: (event, elements, chart) => {
                         if (elements.length > 0) {
                             const clickedIndex = elements[0].index;
                             const clickedCategory = chart.data.labels[clickedIndex];
-                            
-                            // 전재고일람 페이지로 이동
                             showPage('allStockPage');
-
-                            // 해당 종류만 선택 상태로 설정
                             selectedCategories = [clickedCategory];
                             isFirstLoadStock = false;
                             rebuildTables();
